@@ -7,7 +7,7 @@
 <% @meetings.each do |meeting| %>
 	<tr>
 		<td><%= meeting.date %></td>
-		<td><%= link_to meeting.subject, { :action => 'show', :meeting_id => @meeting.id} %></td>
+		<td><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting.id, :project_id => @project.identifier} %></td>
 	</tr>
 <% end %>
 </table>
