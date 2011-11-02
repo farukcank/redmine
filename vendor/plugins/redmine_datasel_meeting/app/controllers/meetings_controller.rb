@@ -3,6 +3,8 @@ class MeetingsController < ApplicationController
 
 
   def index
+	@project = Project.find(params[:project_id])
+	@polls = Meeting.find(:all) # @project.polls
   end
 
   def edit
