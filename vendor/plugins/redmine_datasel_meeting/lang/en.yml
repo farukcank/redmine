@@ -1,2 +1,5 @@
 # English strings go here
 my_label: "My label"
+field_place: "Place"
+field_date: "Date"
+field_agenda: "Agenda"
