@@ -1,6 +1,6 @@
 <h2>Meetings#new</h2>
 <% labelled_tabular_form_for :meeting, @meeting, :url => { :action => "create" } do |f| %>
 <p><%= f.text_field :subject, :size => 60 %></p>
-<%= wikitoolbar_for 'summary' %>
+<%= wikitoolbar_for 'agenda' %>
 <%= submit_tag l(:button_save) %>
 <% end %>
