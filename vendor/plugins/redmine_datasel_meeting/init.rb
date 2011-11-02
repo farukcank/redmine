@@ -2,9 +2,9 @@ require 'redmine'
 
 Redmine::Plugin.register :redmine_datasel_meeting do
   name 'Redmine Datasel Meeting plugin'
-  author 'Author name'
-  description 'This is a plugin for Redmine'
+  author 'Faruk Can KAYA'
+  description 'Plugin for datasel meetings'
   version '0.0.1'
-  url 'http://example.com/path/to/plugin'
-  author_url 'http://example.com/about'
+  url 'https://avicenna.datasel.com.tr/redmine/'
+  author_url 'https://avicenna.datasel.com.tr/redmine/'
 end
