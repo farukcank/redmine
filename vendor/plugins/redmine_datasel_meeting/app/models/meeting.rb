@@ -1,0 +1,7 @@
+class Meeting < ActiveRecord::Base
+  belongs_to :project, :class_name => 'Project', :foreign_key => 'project_id'
+  belongs_to :convacator, :class_name => 'User', :foreign_key => 'convacator_id'
+  belongs_to :issue, :class_name => 'Issue', :foreign_key => 'issue_id'
+  validates_presence_of :date, :place, :subject, :project, :issue
+  validates_length_of :subject, :maximum => 255
+end

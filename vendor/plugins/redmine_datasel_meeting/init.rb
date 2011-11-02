@@ -7,4 +7,6 @@ Redmine::Plugin.register :redmine_datasel_meeting do
   version '0.0.1'
   url 'https://avicenna.datasel.com.tr/redmine/'
   author_url 'https://avicenna.datasel.com.tr/redmine/'
+
+  menu :project_menu, :meetings, { :controller => 'meetings', :action => 'index' }, :caption => 'Meetings', :after => :activity, :param => :project_id
 end

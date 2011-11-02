@@ -1,0 +1,25 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  subject: MyString
+  place: MyString
+  date: 2011-11-02 12:51:17
+  external_participants: MyString
+  agenda: MyText
+  content: MyText
+  issue: 
+  convacator: 
+  internal_participants: 
+  project: 
+two:
+  id: 2
+  subject: MyString
+  place: MyString
+  date: 2011-11-02 12:51:17
+  external_participants: MyString
+  agenda: MyText
+  content: MyText
+  issue: 
+  convacator: 
+  internal_participants: 
+  project: 
