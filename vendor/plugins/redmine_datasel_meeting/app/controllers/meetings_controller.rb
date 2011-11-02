@@ -15,6 +15,10 @@ class MeetingsController < ApplicationController
   def update
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.find(params[:meeting_id])
+  	issue = @meeting.issue
+  	issue.subject = @meeting.subject
+  	issue.description = @meeting.agenda
+  	issue.save
   	if @meeting.update_attributes(params[:post])
   		redirect_to :action => 'show', :project_id => @project, :meeting_id => @meeting.id
   	else
