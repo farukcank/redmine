@@ -10,11 +10,13 @@ class MeetingsController < ApplicationController
   def edit
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.find(params[:meeting_id])
+  	@meeting.convacator_id = @meeting.convacator.id
   end
   
   def update
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.find(params[:meeting_id])
+  	@meeting.convacator = User.find @meeting.convacator_id
   	issue = @meeting.issue
   	issue.subject = @meeting.subject
   	issue.description = @meeting.agenda
@@ -30,6 +32,7 @@ class MeetingsController < ApplicationController
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.new(params[:meeting])
   	@meeting.project = @project
+  	@meeting.convacator = User.find @meeting.convacator_id
   	issue = Issue.new :created_on => Time.now, :start_date => Time.now
   	issue.subject = @meeting.subject
   	issue.description = @meeting.agenda
@@ -51,6 +54,7 @@ class MeetingsController < ApplicationController
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.new()
   	@meeting.convacator = User.current
+  	@meeting.convacator_id = @meeting.convacator.id
   	@meeting.date = Time.now
   end
 
