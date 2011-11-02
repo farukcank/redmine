@@ -51,7 +51,7 @@ Rails::Initializer.run do |config|
   config.action_mailer.perform_deliveries = false
  
   #added for agile plugin
-  config.gem "gruff" 
+ 
 
   config.gem 'rubytree', :lib => 'tree'
   config.gem 'coderay', :version => '~>0.9.7'
