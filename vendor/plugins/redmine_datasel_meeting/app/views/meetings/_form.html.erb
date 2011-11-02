@@ -2,7 +2,7 @@
 <p><%= f.text_field :subject, :size => 60 %></p>
 <p><%= f.text_field :place, :size => 60 %></p>
 <p><%= f.text_field :date, :size => 10 %><%= calendar_for('meeting_date') %></p>
-<p><%= f.select :convacator_id, (User.find {|m| [m.name, m.id]}), :include_blank => true %></p>
+<p><%= f.select :convacator_id, (User.find(:all) {|m| [m.name, m.id]}), :include_blank => true %></p>
 <p><%= f.text_area :agenda, :rows => 10, :class => 'wiki-edit' %></p>
 <p><%= f.text_area :content, :rows => 15, :class => 'wiki-edit' %></p>
 <%= wikitoolbar_for 'meeting_agenda' %>
