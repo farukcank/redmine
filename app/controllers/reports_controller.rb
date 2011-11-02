@@ -28,12 +28,12 @@ class ReportsController < ApplicationController
     @authors = @project.members.collect { |m| m.user }.sort
     @subprojects = @project.descendants.visible
 
-    @issues_by_tracker = Issue.by_tracker(@project)
-    @issues_by_version = Issue.by_version(@project)
-    @issues_by_priority = Issue.by_priority(@project)
-    @issues_by_category = Issue.by_category(@project)
-    @issues_by_assigned_to = Issue.by_assigned_to(@project)
-    @issues_by_author = Issue.by_author(@project)
+    @issues_by_tracker = Issue.by_tracker_with_subprojects(@project)
+    @issues_by_version = Issue.by_version_with_subprojects(@project)
+    @issues_by_priority = Issue.by_priority_with_subprojects(@project)
+    @issues_by_category = Issue.by_category_with_subprojects(@project)
+    @issues_by_assigned_to = Issue.by_assigned_to_with_subprojects(@project)
+    @issues_by_author = Issue.by_author_with_subprojects(@project)
     @issues_by_subproject = Issue.by_subproject(@project) || []
 
     render :template => "reports/issue_report"

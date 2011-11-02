@@ -686,6 +686,37 @@ class Issue < ActiveRecord::Base
                        :field => 'author_id',
                        :joins => User.table_name)
   end
+  
+  # Added to be used in summary report with subprojects
+  def self.by_version_with_subprojects(project)
+    count_and_group_by_with_subprojects(:project => project,
+                       :field => 'fixed_version_id',
+                       :joins => Version.table_name)
+  end
+
+  def self.by_priority_with_subprojects(project)
+    count_and_group_by_with_subprojects(:project => project,
+                       :field => 'priority_id',
+                       :joins => IssuePriority.table_name)
+  end
+
+  def self.by_category_with_subprojects(project)
+    count_and_group_by_with_subprojects(:project => project,
+                       :field => 'category_id',
+                       :joins => IssueCategory.table_name)
+  end
+
+  def self.by_assigned_to_with_subprojects(project)
+    count_and_group_by_with_subprojects(:project => project,
+                       :field => 'assigned_to_id',
+                       :joins => User.table_name)
+  end
+
+  def self.by_author_with_subprojects(project)
+    count_and_group_by_with_subprojects(:project => project,
+                       :field => 'author_id',
+                       :joins => User.table_name)
+  end
 
   def self.by_subproject(project)
     ActiveRecord::Base.connection.select_all("select    s.id as status_id, 
@@ -925,6 +956,34 @@ class Issue < ActiveRecord::Base
                                                 and #{where}
                                                 and #{Issue.table_name}.project_id=#{Project.table_name}.id
                                                 and #{visible_condition(User.current, :project => project)}
+                                              group by s.id, s.is_closed, j.id")
+  end
+  
+  # Query generator for selecting groups of issue counts for a project
+  # based on specific criteria
+  #
+  # Options
+  # * project - Project to search in.
+  # * field - String. Issue field to key off of in the grouping.
+  # * joins - String. The table name to join against.
+  def self.count_and_group_by_with_subprojects(options)
+    project = options.delete(:project)
+    select_field = options.delete(:field)
+    joins = options.delete(:joins)
+
+    where = "#{Issue.table_name}.#{select_field}=j.id"
+
+    ActiveRecord::Base.connection.select_all("select    s.id as status_id, 
+                                                s.is_closed as closed, 
+                                                j.id as #{select_field},
+                                                count(#{Issue.table_name}.id) as total 
+                                              from 
+                                                  #{Issue.table_name}, #{Project.table_name}, #{IssueStatus.table_name} s, #{joins} j
+                                              where 
+                                                #{Issue.table_name}.status_id=s.id 
+                                                and #{where}
+                                                and #{Issue.table_name}.project_id=#{Project.table_name}.id
+                                                and #{visible_condition(User.current, :project => project, :with_subprojects => true)}
                                               group by s.id, s.is_closed, j.id")
   end
 end
