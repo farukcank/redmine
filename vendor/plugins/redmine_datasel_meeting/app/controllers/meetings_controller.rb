@@ -9,16 +9,17 @@ class MeetingsController < ApplicationController
 
   def edit
   end
-
+  def create
+  	@project = Project.find(params[:project_id])
+  	@meeting = Metting.new(params[:meeting])
+  	if @meeting.save
+  		redirect_to :action => 'show', :project_id => @project, :meeting_id => @meeting.id
+  	else
+  		render :action => 'new'
+  	end
+  end
   def new
   	@project = Project.find(params[:project_id])
-  	if request.post?
-  		if @meeting.save
-  			redirect_to :action => 'show', :project_id => @project, :meeting_id => @meeting.id
-  		else
-  			render :action => 'new'
-  		end
-  	end
   end
 
   def show
