@@ -11,7 +11,7 @@ class MeetingsController < ApplicationController
   end
   def create
   	@project = Project.find(params[:project_id])
-  	@meeting = Metting.new(params[:meeting])
+  	@meeting = Meeting.new(params[:meeting])
   	if @meeting.save
   		redirect_to :action => 'show', :project_id => @project, :meeting_id => @meeting.id
   	else
@@ -21,6 +21,7 @@ class MeetingsController < ApplicationController
   def new
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.new()
+  	@meeting.date = Date.today
   end
 
   def show
