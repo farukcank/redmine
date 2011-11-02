@@ -1,6 +1,8 @@
 # English strings go here for Rails i18n
 en:
-  my_label: "My label"
+  label_new_meeting: "New Meeting"
+  label_edit_meeting: "Edit Meeting"
+  label_list_of_meeting: "List Of Meetings"
   field_place: "Place"
   field_date: "Date"
   field_agenda: "Agenda"
