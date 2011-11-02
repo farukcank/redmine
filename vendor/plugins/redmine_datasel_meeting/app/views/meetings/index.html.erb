@@ -1,11 +1,13 @@
 <h2>Meetings#index</h2>
 <table>
 	<tr>
+		<th>Date</th>
 		<th>Subject</th>
 	</tr>
 <% @meetings.each do |meeting| %>
 	<tr>
-		<td><%= meeting.subject %></td>
+		<td><%= meeting.date %></td>
+		<td><%= link_to meeting.subject, { :action => 'show', :meeting_id => @meeting.id} %></td>
 	</tr>
 <% end %>
 </table>
