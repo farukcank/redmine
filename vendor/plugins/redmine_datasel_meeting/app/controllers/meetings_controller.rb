@@ -35,13 +35,12 @@ class MeetingsController < ApplicationController
   	issue.description = @meeting.agenda
   	issue.tracker = @project.trackers.find(:first)
 	issue.project = @project
-	issue.author = User.current
+	issue.author = @meeting.convacator
 	issue.assigned_to = User.current
 	issue.status = IssueStatus.default
 	issue.priority = IssuePriority.all[0]
   	issue.save
   	@meeting.issue = issue
-  	@meeting.convacator = User.current
   	if @meeting.save
   		redirect_to :action => 'show', :project_id => @project, :meeting_id => @meeting.id
   	else
@@ -51,6 +50,7 @@ class MeetingsController < ApplicationController
   def new
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.new()
+  	@meeting.convacator = User.current
   	@meeting.date = Time.now
   end
 

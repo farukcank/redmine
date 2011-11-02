@@ -3,6 +3,8 @@ en:
   label_new_meeting: "New Meeting"
   label_edit_meeting: "Edit Meeting"
   label_list_of_meeting: "List Of Meetings"
+  label_meeting_details: "Meeting Details"
+  field_convacator: "Convacator"
   field_place: "Place"
   field_date: "Date"
   field_agenda: "Agenda"
