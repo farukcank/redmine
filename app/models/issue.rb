@@ -688,6 +688,12 @@ class Issue < ActiveRecord::Base
   end
   
   # Added to be used in summary report with subprojects
+  def self.by_tracker_with_subprojects(project)
+    count_and_group_by_with_subprojects(:project => project,
+                       :field => 'tracker_id',
+                       :joins => Tracker.table_name)
+  end
+  
   def self.by_version_with_subprojects(project)
     count_and_group_by_with_subprojects(:project => project,
                        :field => 'fixed_version_id',
