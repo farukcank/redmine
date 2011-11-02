@@ -1,9 +1,11 @@
-<h2>Meetings#new</h2>
-<% labelled_tabular_form_for :meeting, @meeting, :url => { :action => "create" } do |f| %>
+<h2>New meeting</h2>
+<% labelled_tabular_form_for :meeting, @meeting, :url => { :action => "new", :project_id => @project } do |f| %>
 <p><%= f.text_field :subject, :size => 60 %></p>
 <p><%= f.text_field :place, :size => 60 %></p>
 <p><%= f.text_field :date, :size => 10 %><%= calendar_for('meeting_date') %></p>
-<p><%= f.text_area :agenda, :rows => 5, :class => 'wiki-edit' %></p>
+<p><%= f.text_area :agenda, :rows => 25, :class => 'wiki-edit' %></p>
+<p><%= f.text_area :content, :rows => 50, :class => 'wiki-edit' %></p>
 <%= wikitoolbar_for 'meeting_agenda' %>
+<%= wikitoolbar_for 'meeting_content' %>
 <%= submit_tag l(:button_save) %>
 <% end %>

@@ -4,7 +4,7 @@ class MeetingsController < ApplicationController
 
   def index
 	@project = Project.find(params[:project_id])
-	@polls = Meeting.find(:all) # @project.polls
+	@meetings = Meeting.find(:all) # @project.polls
   end
 
   def edit
@@ -12,8 +12,17 @@ class MeetingsController < ApplicationController
 
   def new
   	@project = Project.find(params[:project_id])
+  	if request.post?
+  		if @meeting.save
+  			redirect_to :action => 'show', :project_id => @project, :meeting_id => @meeting.id
+  		else
+  			render :action => 'new'
+  		end
+  	end
   end
 
   def show
+  	@project = Project.find(params[:project_id])
+  	@meeting = Meeting.find(params[:meeting_id])
   end
 end
