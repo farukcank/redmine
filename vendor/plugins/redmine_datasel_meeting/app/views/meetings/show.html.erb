@@ -1,4 +1,4 @@
-<h2>Meetings#show</h2>
+<h2><%=l(:label_meeting_details)%></h2>
 <table>
 <tr><th>Subject</th><td><%= @meeting.subject %></td></th>
 <tr><th>Place</th><td><%= @meeting.place %></td></th>
@@ -21,3 +21,4 @@
 	</td>
 </tr>
 </table>
+<td><%= link_to 'Update', { :action => 'edit', :meeting_id => @meeting.id, :project_id => @project.identifier} %></td>
