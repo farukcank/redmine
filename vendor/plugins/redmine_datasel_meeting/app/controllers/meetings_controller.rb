@@ -20,6 +20,7 @@ class MeetingsController < ApplicationController
   end
   def new
   	@project = Project.find(params[:project_id])
+  	@meeting = Meeting.new()
   end
 
   def show
