@@ -8,5 +8,6 @@ Redmine::Plugin.register :redmine_datasel_meeting do
   url 'https://avicenna.datasel.com.tr/redmine/'
   author_url 'https://avicenna.datasel.com.tr/redmine/'
 
+  permission :meetings, { :meetings => [:index, :show, :new, :edit] }, :public => true
   menu :project_menu, :meetings, { :controller => 'meetings', :action => 'index' }, :caption => 'Meetings', :after => :activity, :param => :project_id
 end
