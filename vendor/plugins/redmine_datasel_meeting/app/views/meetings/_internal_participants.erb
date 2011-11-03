@@ -1,3 +1,6 @@
+<% meeting.internal_participant.each do |internal_participant| %>
+	<%= internal_participant.user.name %>, 
+<% end %>
 <%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'relation_issue_to_id'} %>
 <% remote_form_for(:internal_participants, @internal_participant, 
                  :url => {:controller => 'internal_participants', :action => 'create', :meeting_id => meeting},
