@@ -4,5 +4,5 @@
                  :method => :post,
                  :complete => "Form.Element.focus('relation_issue_to_id');",
                  :html => {:id => 'add-internal-participant-form', :style => (@internal_participant ? '' : 'display: none;')}) do |f| %>
-<%= render :partial => 'internal_participants/add_form'%>
+<%= render :partial => 'internal_participants/add_form', :locals => {:f => f}%>
 <% end %>
