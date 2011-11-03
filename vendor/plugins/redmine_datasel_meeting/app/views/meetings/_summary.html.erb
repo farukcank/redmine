@@ -1,3 +1,4 @@
+<%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'relation_issue_to_id'} %>
 <table>
 <tr><th>Subject</th><td><%= meeting.subject %></td></tr>
 <tr><th>Place</th><td><%= meeting.place %></td></tr>
@@ -8,7 +9,7 @@
                  :url => {:controller => 'meetings', :action => 'addparticipant', :meeting => meeting},
                  :method => :post,
                  :complete => "Form.Element.focus('relation_issue_to_id');",
-                 :html => {:id => 'new-internal-participant-form', :style => (@internal_participant ? '' : 'display: none;')}) do |f| %>
-<%= render :partial => 'internal_participant', :locals => {:f => f}%>
+                 :html => {:id => 'add-internal-participant-form', :style => (@internal_participant ? '' : 'display: none;')}) do |f| %>
+<%= render :partial => 'internal_participants/add_form', :locals => {:f => f}%>
 <% end %>
 </table>
