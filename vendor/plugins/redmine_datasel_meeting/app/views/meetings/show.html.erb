@@ -1,20 +1,16 @@
 <h2><%=l(:label_meeting_details)%></h2>
-<table>
-<tr><th>Subject</th><td><%= @meeting.subject %></td></th>
-<tr><th>Place</th><td><%= @meeting.place %></td></th>
-<tr><th>Date</th><td><%= @meeting.date %></td></th>
-<tr><th>Convacator</th><td><%= @meeting.convacator.name %></td></th>
-<tr><th colspan='2'>Agenda</th></tr>
+<%= render :partial => 'summary', :locals => {:meeting => @meeting} %>
 <tr>
-	<td colspan='2'>
+	<tr><th>Agenda</th></tr>
+	<td>
 		<div class="wiki">
 			<%= textilizable @meeting, :agenda %>
 		</div>
 	</td>
 </tr>
-<tr><th colspan='2'>Content</th></tr>
+<tr><th>Content</th></tr>
 <tr>
-	<td colspan='2'>
+	<td>
 		<div class="wiki">
 			<%= textilizable @meeting, :content %>
 		</div>

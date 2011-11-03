@@ -3,11 +3,13 @@
 	<tr>
 		<th>Date</th>
 		<th>Subject</th>
+		<th>Issue</th>
 	</tr>
 <% @meetings.each do |meeting| %>
 	<tr>
 		<td><%= meeting.date %></td>
 		<td><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting.id, :project_id => @project.identifier} %></td>
+		<td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
 	</tr>
 <% end %>
 </table>
