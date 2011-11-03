@@ -28,7 +28,7 @@ class PanelIssueHooks < Redmine::Hook::ViewListener
 			statuses.each do |s|
 				if (s != issue.status)
 					o << '<tr><td>'
-					o << link_to(s.name, {:controller => 'issues', :action => 'update', :id => issue, :issue => {:status_id => s}, :back_to => "/issues/show/"+issue_id, :authenticity_token => form_authenticity_token(request.session)}, :method => :put, :class => 'icon icon-move' )
+					o << link_to(s.name, {:controller => 'issues', :action => 'edit', :id => issue, :issue => {:status_id => s}}, :class => 'icon icon-edit' )
 					o << '</td><td align="right">'
 					o << link_to("Edit", {:controller => 'issues', :action => 'edit', :id => issue, :issue => {:status_id => s}}, :class => 'icon icon-edit' )
 					o << '</td></tr>'
