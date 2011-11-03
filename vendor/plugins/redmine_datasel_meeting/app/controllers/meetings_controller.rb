@@ -32,7 +32,7 @@ class MeetingsController < ApplicationController
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.new(params[:meeting])
   	@meeting.project = @project
-  	@meeting.convacator = User.current
+  	@meeting.convacator = User.find params[:meeting][:convacator_id]
   	issue = Issue.new :created_on => Time.now, :start_date => Time.now
   	issue.subject = @meeting.subject
   	issue.description = @meeting.agenda
