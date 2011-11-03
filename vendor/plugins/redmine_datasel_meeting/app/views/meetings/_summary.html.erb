@@ -1,15 +1,16 @@
-<%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'relation_issue_to_id'} %>
 <table>
 <tr><th>Subject</th><td><%= meeting.subject %></td></tr>
 <tr><th>Place</th><td><%= meeting.place %></td></tr>
 <tr><th>Date</th><td><%= meeting.date %></td></tr>
 <tr><th>Issue</th><td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td></tr>
 <tr><th>Convacator</th><td><%= meeting.convacator.name %></td></tr>
-</table>
+<tr><th>Participants</th><td><%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'relation_issue_to_id'} %>
 <% remote_form_for(:internal_participants, @internal_participant, 
                  :url => {:controller => 'internal_participants', :action => 'create', :meeting => meeting},
                  :method => :post,
                  :complete => "Form.Element.focus('relation_issue_to_id');",
                  :html => {:id => 'add-internal-participant-form', :style => (@internal_participant ? '' : 'display: none;')}) do |f| %>
 <%= render :partial => 'internal_participants/add_form', :locals => {:f => f}%>
+</td></th>
+</table>
 <% end %>
