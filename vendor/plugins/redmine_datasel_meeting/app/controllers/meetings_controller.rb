@@ -4,8 +4,7 @@ class MeetingsController < ApplicationController
 
   def index
 	@project = Project.find(params[:project_id])
-	Meeting.find(:all, :conditions =>["project_id=?", @project.id])
-	@meetings = Meeting.find(:all)
+	@meetings = Meeting.find(:all, :conditions =>["project_id=?", @project.id])
   end
 
   def edit
