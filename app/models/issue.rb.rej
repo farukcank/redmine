@@ -1,0 +1,21 @@
+***************
+*** 335,340 ****
+          errors.add_to_base I18n.t(:error_can_not_reopen_issue_on_closed_version)
+        end
+      end
+      
+      # Checks that the issue can not be added/moved to a disabled tracker
+      if project && (tracker_id_changed? || project_id_changed?)
+--- 339,350 ----
+          errors.add_to_base I18n.t(:error_can_not_reopen_issue_on_closed_version)
+        end
+      end
++ 
++     if category
++       if !assignable_categories.include?(category)
++         errors.add :category_id, :inclusion
++       end
++     end
+      
+      # Checks that the issue can not be added/moved to a disabled tracker
+      if project && (tracker_id_changed? || project_id_changed?)
