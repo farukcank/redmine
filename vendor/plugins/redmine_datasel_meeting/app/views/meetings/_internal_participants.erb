@@ -1,4 +1,4 @@
-<% meeting.internal_participant.each do |internal_participant| %>
+<% meeting.internal_participants.each do |internal_participant| %>
 	<%= internal_participant.user.name %>, 
 <% end %>
 <%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'relation_issue_to_id'} %>
