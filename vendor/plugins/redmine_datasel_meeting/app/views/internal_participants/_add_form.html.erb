@@ -1,1 +1,2 @@
+<%= error_messages_for 'internal_participant' %>
 <p><%= f.select :user_id, (User.find(:all).collect {|m| [m.name, m.id]}), :include_blank => true %><%= submit_tag l(:button_save) %></p>
