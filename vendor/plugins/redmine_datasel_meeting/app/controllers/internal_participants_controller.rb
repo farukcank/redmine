@@ -3,7 +3,10 @@ class InternalParticipantsController < ApplicationController
   def create
   	@meeting = Meeting.find(params[:meeting_id])
   	@internal_participant = InternalParticipant.new(params[:internal_participant])
-  	@internal_participant.save if request.post?
+  	@internal_participant.meeting = @meeting
+  	if !@internal_participant.save
+  		puts 'Failed to save internal participant'
+  	end
   	respond_to do |format|
       format.html { redirect_to :controller => 'meetings', :action => 'show', :meeting_id => @meeting, :project_id => @meeting.project.id }
       format.js do
