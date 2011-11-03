@@ -1,0 +1,8 @@
+<%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'relation_issue_to_id'} %>
+<% remote_form_for(:internal_participants, @internal_participant, 
+                 :url => {:controller => 'internal_participants', :action => 'create', :meeting_id => meeting},
+                 :method => :post,
+                 :complete => "Form.Element.focus('relation_issue_to_id');",
+                 :html => {:id => 'add-internal-participant-form', :style => (@internal_participant ? '' : 'display: none;')}) do |f| %>
+<%= render :partial => 'internal_participants/add_form', :locals => {:f => f}%>
+<% end %>
