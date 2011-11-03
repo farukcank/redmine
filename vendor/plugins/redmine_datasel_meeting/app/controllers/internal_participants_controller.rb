@@ -8,7 +8,7 @@ class InternalParticipantsController < ApplicationController
       format.js do
         @internal_participants = @meeting.internal_participants
         render :update do |page|
-          page.replace_html "internalparticipants", :partial => 'meetings/internal_participants', , :locals => {:meeting => @meeting}
+          page.replace_html "internalparticipants", :partial => 'meetings/internal_participants', :locals => {:meeting => @meeting}
           if @relation.errors.empty?
             page << "$('relation_delay').value = ''"
             page << "$('relation_issue_to_id').value = ''"
