@@ -1,4 +1,3 @@
 <%= error_messages_for 'internal_participant' %>
 <p><%= f.select :user_id, (User.find(:all).select{|m| (m != @meeting.convacator) and (not @meeting.internal_participant_users.include?(m))}.collect {|m| [m.name, m.id]}), :include_blank => true %><%= submit_tag l(:button_save) %><%= toggle_link l(:button_cancel), 'add-internal-participant-form'%>
 </p>
-<%= javascript_tag "setPredecessorFieldsVisibility();" %>
