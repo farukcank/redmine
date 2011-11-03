@@ -70,11 +70,11 @@
 		</ul>
 	</li>
 	<% end %>
-	<% unless @project.nil? || @project.issue_categories.empty? -%>
+	<% unless @project.nil? || @project.shared_categories.empty? -%>
 	<li class="folder">			
 		<a href="#" class="submenu"><%= l(:field_category) %></a>
 		<ul>
-		<% @project.issue_categories.each do |u| -%>
+		<% @project.shared_categories.each do |u| -%>
 		    <li><%= context_menu_link u.name, {:controller => 'issues', :action => 'bulk_edit', :ids => @issues.collect(&:id), :issue => {'category_id' => u}, :back_url => @back}, :method => :post,
 		                              :selected => (@issue && u == @issue.category), :disabled => !@can[:update] %></li>
 		<% end -%>
