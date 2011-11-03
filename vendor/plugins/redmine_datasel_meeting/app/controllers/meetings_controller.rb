@@ -21,7 +21,7 @@ class MeetingsController < ApplicationController
   	issue.subject = @meeting.subject
   	issue.description = @meeting.agenda
   	issue.save
-  	if @meeting.update_attributes(params[:post])
+  	if @meeting.update_attributes(params[:meeting])
   		redirect_to :action => 'show', :project_id => @project, :meeting_id => @meeting.id
   	else
   		render :action => 'edit'
