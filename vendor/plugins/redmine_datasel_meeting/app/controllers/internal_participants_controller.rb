@@ -14,8 +14,7 @@ class InternalParticipantsController < ApplicationController
         render :update do |page|
           page.replace_html "internalparticipants", :partial => 'meetings/internal_participants', :locals => {:meeting => @meeting}
           if @meeting.errors.empty?
-            page << "$('relation_delay').value = ''"
-            page << "$('relation_issue_to_id').value = ''"
+            page << "$('internal_participant_user_id').value = ''"
           end
         end
       end
