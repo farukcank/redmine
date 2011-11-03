@@ -1,5 +1,5 @@
 <h2><%=l(:label_edit_meeting)%></h2>
 <%= render :partial => 'summary', :locals => {:meeting => @meeting} %>
-<% labelled_tabular_form_for :meeting, @meeting, :url => { :action => "update", :project_id => @project } do |f| %>
+<% labelled_tabular_form_for :meeting, @meeting, :url => { :action => "update", :project_id => @project,:meeting => @meeting } do |f| %>
 <%= render :partial => 'form', :locals => {:f => f} %>
 <% end %>
