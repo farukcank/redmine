@@ -43,7 +43,7 @@ class PanelIssueHooks < Redmine::Hook::ViewListener
 				if (u != issue.assigned_to)
 					o << '<tr><td>'
 					o << avatar(u, :size => "14", :style => "float: left; margin-right: 2px;") if avatar(u, :size => "14") != nil
-					o << link_to(u.name, {:controller => 'issues', :action => 'update', :id => issue, :issue => {:assigned_to_id => u}, :back_to => "/issues/show/"+issue_id, :authenticity_token => form_authenticity_token(request.session)}, :method => :put)
+					o << link_to(u.name, {:controller => 'issues', :action => 'edit', :id => issue, :issue => {:assigned_to_id => u},:class => 'icon icon-edit' )
 					o << '</td></tr>'
 				end
 			end
