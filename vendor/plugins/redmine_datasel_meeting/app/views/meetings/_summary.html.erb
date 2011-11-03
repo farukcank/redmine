@@ -6,4 +6,6 @@
 <tr><th>Convacator</th><td><%= meeting.convacator.name %></td></tr>
 </table>
 <p>Participants</p>
+<div id="relations">
 <%= render :partial => 'internal_participants', :locals => {:meeting => meeting}%>
+</div>
