@@ -29,8 +29,6 @@ class PanelIssueHooks < Redmine::Hook::ViewListener
 				if (s != issue.status)
 					o << '<tr><td>'
 					o << link_to(s.name, {:controller => 'issues', :action => 'edit', :id => issue, :issue => {:status_id => s}}, :class => 'icon icon-edit' )
-					o << '</td><td align="right">'
-					o << link_to("Edit", {:controller => 'issues', :action => 'edit', :id => issue, :issue => {:status_id => s}}, :class => 'icon icon-edit' )
 					o << '</td></tr>'
 				end
 			end
