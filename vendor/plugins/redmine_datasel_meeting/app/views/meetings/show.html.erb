@@ -1,5 +1,11 @@
 <h2><%=l(:label_meeting_details)%></h2>
+<div class="contextual">
+<%= link_to_if_authorized(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :project_id => @project.identifier }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
+</div>
 <%= render :partial => 'summary', :locals => {:meeting => @meeting} %>
+<div class="contextual">
+<%= link_to_if_authorized(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :project_id => @project.identifier }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
+</div>
 <tr>
 	<tr><th>Agenda</th></tr>
 	<td>
@@ -17,4 +23,3 @@
 	</td>
 </tr>
 </table>
-<td><%= link_to 'Update', { :action => 'edit', :meeting_id => @meeting.id, :project_id => @project.identifier} %></td>
