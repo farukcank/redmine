@@ -165,6 +165,10 @@ class Issue < ActiveRecord::Base
       unless new_project.shared_versions.include?(issue.fixed_version)
         issue.fixed_version = nil
       end
+      # Keep the category if it's still valid in the new_project
+      unless new_project.shared_categories.include?(issue.category)
+        issue.category = nil
+      end
       issue.project = new_project
       if issue.parent && issue.parent.project_id != issue.project_id
         issue.parent_issue_id = nil
@@ -226,6 +230,11 @@ class Issue < ActiveRecord::Base
     result = write_attribute(:tracker_id, tid)
     @custom_field_values = nil
     result
+  end
+
+  # Categories that the issue can be assigned to
+  def assignable_categories
+    @assignable_categories ||= (project.shared_categories + [IssueCategory.find_by_id(category_id_was)]).compact.uniq.sort
   end
   
   def description=(arg)
@@ -686,6 +695,12 @@ class Issue < ActiveRecord::Base
                        :field => 'author_id',
                        :joins => User.table_name)
   end
+
+  # Unassigns issues from +category+ if it's no longer shared with issue's project
+  def self.update_categories_from_sharing_change(category)
+    # Update issues assigned to the category
+    update_categories(["#{Issue.table_name}.category_id = ?", category.id])
+  end
   
   # Added to be used in summary report with subprojects
   def self.by_tracker_with_subprojects(project)
@@ -963,6 +978,26 @@ class Issue < ActiveRecord::Base
                                                 and #{Issue.table_name}.project_id=#{Project.table_name}.id
                                                 and #{visible_condition(User.current, :project => project)}
                                               group by s.id, s.is_closed, j.id")
+  end
+
+  # Update issues so their categories are not pointing to a
+  # fixed_version that is not shared with the issue's project
+  def self.update_categories(conditions=nil)
+    # Only need to update issues with a fixed_version from
+    # a different project and that is not systemwide shared
+    Issue.all(:conditions => merge_conditions("#{Issue.table_name}.category_id IS NOT NULL" +
+                                                " AND #{Issue.table_name}.project_id <> #{IssueCategory.table_name}.project_id" +
+                                                " AND #{IssueCategory.table_name}.sharing <> 'system'",
+                                                conditions),
+              :include => [:project, :category]
+              ).each do |issue|
+      next if issue.project.nil? || issue.category.nil?
+      unless issue.project.shared_categories.include?(issue.category)
+        issue.init_journal(User.current)
+        issue.category = nil
+        issue.save
+      end
+    end
   end
   
   # Query generator for selecting groups of issue counts for a project

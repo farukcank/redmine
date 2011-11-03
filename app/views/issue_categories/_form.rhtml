@@ -3,4 +3,5 @@
 <div class="box">
 <p><%= f.text_field :name, :size => 30, :required => true %></p>
 <p><%= f.select :assigned_to_id, @project.users.sort.collect{|u| [u.name, u.id]}, :include_blank => true %></p>
+<p><%= f.select :sharing, @category.allowed_sharings.collect{|c| [format_category_sharing(c), c]} %></p>
 </div>

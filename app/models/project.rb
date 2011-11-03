@@ -408,6 +408,19 @@ class Project < ActiveRecord::Base
     end
   end
 
+  # Returns a scope of the Versions used by the project
+  def shared_categories
+    @shared_categories ||=
+      IssueCategory.find(:all, :include => :project,
+                     :conditions => "#{Project.table_name}.id = #{id}" +
+                                    " OR (#{Project.table_name}.status = #{Project::STATUS_ACTIVE} AND (" +
+                                          " #{IssueCategory.table_name}.sharing = 'system'" +
+                                          " OR (#{Project.table_name}.lft >= #{root.lft} AND #{Project.table_name}.rgt <= #{root.rgt} AND #{IssueCategory.table_name}.sharing = 'tree')" +
+                                          " OR (#{Project.table_name}.lft < #{lft} AND #{Project.table_name}.rgt > #{rgt} AND #{IssueCategory.table_name}.sharing IN ('hierarchy', 'descendants'))" +
+                                          " OR (#{Project.table_name}.lft > #{lft} AND #{Project.table_name}.rgt < #{rgt} AND #{IssueCategory.table_name}.sharing = 'hierarchy')" +
+                                          "))")
+  end
+
   # Returns a hash of project users grouped by role
   def users_by_role
     members.find(:all, :include => [:user, :roles]).inject({}) do |h, m|

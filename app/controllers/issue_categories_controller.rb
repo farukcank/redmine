@@ -25,6 +25,8 @@ class IssueCategoriesController < ApplicationController
   
   verify :method => :post, :only => :destroy
 
+  helper :projects
+
   def new
     @category = @project.issue_categories.build(params[:category])
     if request.post?
