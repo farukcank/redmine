@@ -1,0 +1,231 @@
+diff --git a/app/controllers/issue_categories_controller.rb b/app/controllers/issue_categories_controller.rb
+index a43a767..79fd5b2 100644
+--- a/app/controllers/issue_categories_controller.rb
++++ b/app/controllers/issue_categories_controller.rb
+@@ -25,6 +25,8 @@ class IssueCategoriesController < ApplicationController
+   
+   verify :method => :post, :only => :destroy
+ 
++  helper :projects
++
+   def new
+     @category = @project.issue_categories.build(params[:category])
+     if request.post?
+diff --git a/app/helpers/projects_helper.rb b/app/helpers/projects_helper.rb
+index 3b089c1..f50a1ee 100644
+--- a/app/helpers/projects_helper.rb
++++ b/app/helpers/projects_helper.rb
+@@ -105,4 +105,9 @@ module ProjectsHelper
+     sharing = 'none' unless Version::VERSION_SHARINGS.include?(sharing)
+     l("label_version_sharing_#{sharing}")
+   end
++
++  def format_category_sharing(sharing)
++    sharing = 'none' unless IssueCategory::SHARINGS.include?(sharing)
++    l("label_version_sharing_#{sharing}")
++  end
+ end
+diff --git a/app/models/issue.rb b/app/models/issue.rb
+index 40b64f3..46c6cbd 100644
+--- a/app/models/issue.rb
++++ b/app/models/issue.rb
+@@ -143,6 +143,10 @@ class Issue < ActiveRecord::Base
+       unless new_project.shared_versions.include?(issue.fixed_version)
+         issue.fixed_version = nil
+       end
++      # Keep the category if it's still valid in the new_project
++      unless new_project.shared_categories.include?(issue.category)
++        issue.category = nil
++      end
+       issue.project = new_project
+       if issue.parent && issue.parent.project_id != issue.project_id
+         issue.parent_issue_id = nil
+@@ -313,6 +317,12 @@ class Issue < ActiveRecord::Base
+         errors.add_to_base I18n.t(:error_can_not_reopen_issue_on_closed_version)
+       end
+     end
++
++    if category
++      if !assignable_categories.include?(category)
++        errors.add :category_id, :inclusion
++      end
++    end
+     
+     # Checks that the issue can not be added/moved to a disabled tracker
+     if project && (tracker_id_changed? || project_id_changed?)
+@@ -414,6 +424,11 @@ class Issue < ActiveRecord::Base
+   def assignable_versions
+     @assignable_versions ||= (project.shared_versions.open + [Version.find_by_id(fixed_version_id_was)]).compact.uniq.sort
+   end
++
++  # Categories that the issue can be assigned to
++  def assignable_categories
++    @assignable_categories ||= (project.shared_categories + [IssueCategory.find_by_id(category_id_was)]).compact.uniq.sort
++  end
+   
+   # Returns true if this issue is blocked by another issue that is still open
+   def blocked?
+@@ -573,6 +588,12 @@ class Issue < ActiveRecord::Base
+     # Update issues assigned to the version
+     update_versions(["#{Issue.table_name}.fixed_version_id = ?", version.id])
+   end
++
++  # Unassigns issues from +category+ if it's no longer shared with issue's project
++  def self.update_categories_from_sharing_change(category)
++    # Update issues assigned to the category
++    update_categories(["#{Issue.table_name}.category_id = ?", category.id])
++  end
+   
+   # Unassigns issues from versions that are no longer shared
+   # after +project+ was moved
+@@ -776,6 +797,26 @@ class Issue < ActiveRecord::Base
+       end
+     end
+   end
++
++  # Update issues so their categories are not pointing to a
++  # fixed_version that is not shared with the issue's project
++  def self.update_categories(conditions=nil)
++    # Only need to update issues with a fixed_version from
++    # a different project and that is not systemwide shared
++    Issue.all(:conditions => merge_conditions("#{Issue.table_name}.category_id IS NOT NULL" +
++                                                " AND #{Issue.table_name}.project_id <> #{IssueCategory.table_name}.project_id" +
++                                                " AND #{IssueCategory.table_name}.sharing <> 'system'",
++                                                conditions),
++              :include => [:project, :category]
++              ).each do |issue|
++      next if issue.project.nil? || issue.category.nil?
++      unless issue.project.shared_categories.include?(issue.category)
++        issue.init_journal(User.current)
++        issue.category = nil
++        issue.save
++      end
++    end
++  end
+   
+   # Callback on attachment deletion
+   def attachment_removed(obj)
+diff --git a/app/models/issue_category.rb b/app/models/issue_category.rb
+index 51baeb4..982535c 100644
+--- a/app/models/issue_category.rb
++++ b/app/models/issue_category.rb
+@@ -16,13 +16,17 @@
+ # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ 
+ class IssueCategory < ActiveRecord::Base
++  after_update :update_issues_from_sharing_change
+   belongs_to :project
+   belongs_to :assigned_to, :class_name => 'User', :foreign_key => 'assigned_to_id'
+   has_many :issues, :foreign_key => 'category_id', :dependent => :nullify
++
++  SHARINGS = %w(none descendants hierarchy tree system)
+   
+   validates_presence_of :name
+   validates_uniqueness_of :name, :scope => [:project_id]
+   validates_length_of :name, :maximum => 30
++  validates_inclusion_of :sharing, :in => SHARINGS
+   
+   alias :destroy_without_reassign :destroy
+   
+@@ -40,4 +44,36 @@ class IssueCategory < ActiveRecord::Base
+   end
+   
+   def to_s; name end
++
++  # Returns the sharings that +user+ can set the category to
++  def allowed_sharings(user = User.current)
++    SHARINGS.select do |s|
++      if sharing == s
++        true
++      else
++        case s
++        when 'system'
++          # Only admin users can set a systemwide sharing
++          user.admin?
++        when 'hierarchy', 'tree'
++          # Only users allowed to manage versions of the root project can
++          # set sharing to hierarchy or tree
++          project.nil? || user.allowed_to?(:manage_versions, project.root)
++        else
++          true
++        end
++      end
++    end
++  end
++
++  # Update the issue's fixed versions. Used if a version's sharing changes.
++  def update_issues_from_sharing_change
++    if sharing_changed?
++      if SHARINGS.index(sharing_was).nil? ||
++          SHARINGS.index(sharing).nil? ||
++          SHARINGS.index(sharing_was) > SHARINGS.index(sharing)
++        Issue.update_categories_from_sharing_change self
++      end
++    end
++  end
+ end
+diff --git a/app/models/project.rb b/app/models/project.rb
+index 8315a48..5324be1 100644
+--- a/app/models/project.rb
++++ b/app/models/project.rb
+@@ -384,6 +384,19 @@ class Project < ActiveRecord::Base
+                                           "))")
+   end
+ 
++  # Returns a scope of the Versions used by the project
++  def shared_categories
++    @shared_categories ||=
++      IssueCategory.find(:all, :include => :project,
++                     :conditions => "#{Project.table_name}.id = #{id}" +
++                                    " OR (#{Project.table_name}.status = #{Project::STATUS_ACTIVE} AND (" +
++                                          " #{IssueCategory.table_name}.sharing = 'system'" +
++                                          " OR (#{Project.table_name}.lft >= #{root.lft} AND #{Project.table_name}.rgt <= #{root.rgt} AND #{IssueCategory.table_name}.sharing = 'tree')" +
++                                          " OR (#{Project.table_name}.lft < #{lft} AND #{Project.table_name}.rgt > #{rgt} AND #{IssueCategory.table_name}.sharing IN ('hierarchy', 'descendants'))" +
++                                          " OR (#{Project.table_name}.lft > #{lft} AND #{Project.table_name}.rgt < #{rgt} AND #{IssueCategory.table_name}.sharing = 'hierarchy')" +
++                                          "))")
++  end
++
+   # Returns a hash of project users grouped by role
+   def users_by_role
+     members.find(:all, :include => [:user, :roles]).inject({}) do |h, m|
+diff --git a/app/views/issue_categories/_form.rhtml b/app/views/issue_categories/_form.rhtml
+index 2328088..8280499 100644
+--- a/app/views/issue_categories/_form.rhtml
++++ b/app/views/issue_categories/_form.rhtml
+@@ -3,4 +3,5 @@
+ <div class="box">
+ <p><%= f.text_field :name, :size => 30, :required => true %></p>
+ <p><%= f.select :assigned_to_id, @project.users.sort.collect{|u| [u.name, u.id]}, :include_blank => true %></p>
++<p><%= f.select :sharing, @category.allowed_sharings.collect{|c| [format_category_sharing(c), c]} %></p>
+ </div>
+diff --git a/app/views/issues/_attributes.rhtml b/app/views/issues/_attributes.rhtml
+index e10858b..076fa52 100644
+--- a/app/views/issues/_attributes.rhtml
++++ b/app/views/issues/_attributes.rhtml
+@@ -9,8 +9,8 @@
+ 
+ <p><%= f.select :priority_id, (@priorities.collect {|p| [p.name, p.id]}), {:required => true}, :disabled => !@issue.leaf? %></p>
+ <p><%= f.select :assigned_to_id, (@issue.assignable_users.collect {|m| [m.name, m.id]}), :include_blank => true %></p>
+-<% unless @project.issue_categories.empty? %>
+-<p><%= f.select :category_id, (@project.issue_categories.collect {|c| [c.name, c.id]}), :include_blank => true %>
++<% unless @issue.assignable_categories.empty? %>
++<p><%= f.select :category_id, (@issue.assignable_categories.collect {|c| [c.name, c.id]}), :include_blank => true %>
+ <%= prompt_to_remote(image_tag('add.png', :style => 'vertical-align: middle;'),
+                      l(:label_issue_category_new),
+                      'category[name]', 
+diff --git a/db/migrate/20110216000000_add_issue_category_sharing.rb b/db/migrate/20110216000000_add_issue_category_sharing.rb
+new file mode 100644
+index 0000000..271ac8c
+--- /dev/null
++++ b/db/migrate/20110216000000_add_issue_category_sharing.rb
+@@ -0,0 +1,10 @@
++class AddIssueCategorySharing < ActiveRecord::Migration
++  def self.up
++    add_column :issue_categories, :sharing, :string, :default => 'none', :null => false
++    add_index :issue_categories, :sharing
++  end
++
++  def self.down
++    remove_column :issue_categories, :sharing
++  end
++end
