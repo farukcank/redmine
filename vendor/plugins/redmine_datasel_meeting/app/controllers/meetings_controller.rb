@@ -32,14 +32,14 @@ class MeetingsController < ApplicationController
   	@project = Project.find(params[:project_id])
   	@meeting = Meeting.new(params[:meeting])
   	@meeting.project = @project
-  	@meeting.convacator = User.find params[:meeting][:convacator_id]
+  	@meeting.convacator = User.current
   	issue = Issue.new :created_on => Time.now, :start_date => Time.now
   	issue.subject = @meeting.subject
   	issue.description = @meeting.agenda
   	issue.tracker = @project.trackers.find(:first)
 	issue.project = @project
 	issue.author = @meeting.convacator
-	issue.assigned_to = User.current
+	issue.assigned_to = @meeting.convacator
 	issue.status = IssueStatus.default
 	issue.priority = IssuePriority.all[0]
   	issue.save
