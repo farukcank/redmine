@@ -6,14 +6,6 @@
 <div class="contextual">
 <%= link_to_if_authorized(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :project_id => @project.identifier }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
 </div>
-<tr>
-	<tr><th>Agenda</th></tr>
-	<td>
-		<div class="wiki">
-			<%= textilizable @meeting, :agenda %>
-		</div>
-	</td>
-</tr>
 <tr><th>Content</th></tr>
 <tr>
 	<td>

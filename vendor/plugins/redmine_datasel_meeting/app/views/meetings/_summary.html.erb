@@ -1,19 +1,26 @@
 <div class="issue">
-<div class="subject">
-	<div><h3><%= meeting.subject %></h3></div>
-</div>
-<table class="attributes">
-<tbody>
-	<tr>
-		<th>Place</th><td><%= meeting.place %></td>
-		<th>Date</th><td><%= meeting.date %></td></tr>
-	<tr>
-		<th>Issue</th><td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
-		<th>Convacator</th><td><%= meeting.convacator.name %></td>
-	</tr>
-</tbody>
-</table>
-<p>Participants</p>
-<div id="internalparticipants">
-<%= render :partial => 'internal_participants', :locals => {:meeting => meeting}%>
+	<div class="subject">
+		<div><h3><%= meeting.subject %></h3></div>
+	</div>
+	<table class="attributes">
+		<tbody>
+			<tr>
+				<th>Place</th><td><%= meeting.place %></td>
+				<th>Date</th><td><%= meeting.date %></td></tr>
+			<tr>
+				<th>Issue</th><td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
+				<th>Convacator</th><td><%= meeting.convacator.name %></td>
+			</tr>
+		</tbody>
+	</table>
+	<hr/>
+	<p><strong>Participants</strong></p>
+	<div id="internalparticipants">
+		<%= render :partial => 'internal_participants', :locals => {:meeting => meeting}%>
+	</div>
+	<hr/>
+	<p><strong>Agenda</strong></p>
+	<div class="wiki">
+		<%= textilizable meeting, :agenda %>
+	</div>
 </div>

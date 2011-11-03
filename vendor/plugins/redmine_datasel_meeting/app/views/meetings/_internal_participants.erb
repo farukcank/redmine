@@ -1,7 +1,9 @@
+<div class="contextual">
+	<%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'internal_participant_user_id'} %>
+</div>
 <% meeting.internal_participants.each do |internal_participant| %>
 	<%= internal_participant.user.name %>, 
 <% end %>
-<%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'internal_participant_user_id'} %>
 <% remote_form_for(:internal_participant, @internal_participant, 
                  :url => {:controller => 'internal_participants', :action => 'create', :meeting_id => meeting},
                  :method => :post,
