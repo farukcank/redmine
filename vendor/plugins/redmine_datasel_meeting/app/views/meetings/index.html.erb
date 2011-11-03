@@ -9,7 +9,7 @@
 			<% @meetings.each do |meeting| %>
 			<tr>
 				<td class="id"><%= link_to meeting.id, { :action => 'show', :meeting_id => meeting.id, :project_id => @project.identifier} %></td>
-				<td class="updated_on"><%= format_date(meeting.date) %></td>
+				<td class="updated_on"><%= format_time(meeting.date) %></td>
 				<td class="subject"><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting.id, :project_id => @project.identifier} %></td>
 				<td class="assigned_to"><%= meeting.convacator.name %></td>
 				<td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
