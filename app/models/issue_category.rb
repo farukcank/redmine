@@ -16,13 +16,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class IssueCategory < ActiveRecord::Base
+  after_update :update_issues_from_sharing_change
   belongs_to :project
   belongs_to :assigned_to, :class_name => 'User', :foreign_key => 'assigned_to_id'
   has_many :issues, :foreign_key => 'category_id', :dependent => :nullify
+
+  SHARINGS = %w(none descendants hierarchy tree system)
   
   validates_presence_of :name
   validates_uniqueness_of :name, :scope => [:project_id]
   validates_length_of :name, :maximum => 30
+  validates_inclusion_of :sharing, :in => SHARINGS
   
   named_scope :named, lambda {|arg| { :conditions => ["LOWER(#{table_name}.name) = LOWER(?)", arg.to_s.strip]}}
   
@@ -42,4 +46,36 @@ class IssueCategory < ActiveRecord::Base
   end
   
   def to_s; name end
+
+  # Returns the sharings that +user+ can set the category to
+  def allowed_sharings(user = User.current)
+    SHARINGS.select do |s|
+      if sharing == s
+        true
+      else
+        case s
+        when 'system'
+          # Only admin users can set a systemwide sharing
+          user.admin?
+        when 'hierarchy', 'tree'
+          # Only users allowed to manage versions of the root project can
+          # set sharing to hierarchy or tree
+          project.nil? || user.allowed_to?(:manage_versions, project.root)
+        else
+          true
+        end
+      end
+    end
+  end
+
+  # Update the issue's fixed versions. Used if a version's sharing changes.
+  def update_issues_from_sharing_change
+    if sharing_changed?
+      if SHARINGS.index(sharing_was).nil? ||
+          SHARINGS.index(sharing).nil? ||
+          SHARINGS.index(sharing_was) > SHARINGS.index(sharing)
+        Issue.update_categories_from_sharing_change self
+      end
+    end
+  end
 end
