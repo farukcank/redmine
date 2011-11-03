@@ -1,16 +1,18 @@
+<div class="contextual"><%= link_to 'New Meeting', { :action => 'new', :project_id => @project.identifier,:class => 'icon icon-edit', :accesskey => accesskey(:edit)} %></div>
 <h2><%=l(:label_list_of_meeting)%></h2>
-<table>
-	<tr>
-		<th>Date</th>
-		<th>Subject</th>
-		<th>Issue</th>
-	</tr>
-<% @meetings.each do |meeting| %>
-	<tr>
-		<td><%= meeting.date %></td>
-		<td><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting.id, :project_id => @project.identifier} %></td>
-		<td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
-	</tr>
-<% end %>
-</table>
-<%= link_to 'New Meeting', { :action => 'new', :project_id => @project.identifier} %>
+<div class="autoscroll">
+	<table class="list">
+		<tbody>
+			<tr>
+				<th>Date</th><th>Subject</th><th>Issue</th>
+			</tr>
+			<% @meetings.each do |meeting| %>
+			<tr>
+				<td><%= meeting.date %></td>
+				<td><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting.id, :project_id => @project.identifier} %></td>
+				<td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
+			</tr>
+			<% end %>
+		</tbody>			
+	</table>
+</div>
