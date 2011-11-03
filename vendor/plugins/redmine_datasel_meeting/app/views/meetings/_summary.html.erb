@@ -6,4 +6,4 @@
 <tr><th>Convacator</th><td><%= meeting.convacator.name %></td></tr>
 </table>
 <p>Participants</p>
-<%= render :partial => 'internal_participants'%>
+<%= render :partial => 'internal_participants', :locals => {:meeting => meeting}%>
