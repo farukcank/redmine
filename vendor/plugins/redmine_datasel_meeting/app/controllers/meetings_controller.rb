@@ -38,8 +38,8 @@ class MeetingsController < ApplicationController
   	issue.description = @meeting.agenda
   	issue.tracker = @project.trackers.find(:first)
 	issue.project = @project
-	issue.author = @meeting.convacator
-	issue.assigned_to = @meeting.convacator
+	issue.author = User.current
+	#issue.assigned_to_id = @meeting.convacator_id
 	issue.status = IssueStatus.default
 	issue.priority = IssuePriority.all[0]
   	issue.save
