@@ -7,12 +7,11 @@ class MeetingsController < ApplicationController
   end
 
   def edit
-  	@meeting = Meeting.find(params[:meeting_id])
-  	@meeting.convacator_id = @meeting.convacator.id
+	find_meeting
   end
   
   def update
-  	@meeting = Meeting.find(params[:meeting_id])
+	find_meeting
   	#@meeting.convacator = User.find params[:meeting][:convacator_id]
   	issue = @meeting.issue
   	issue.subject = @meeting.subject
@@ -59,10 +58,19 @@ class MeetingsController < ApplicationController
   end
 
   def show
-  	@meeting = Meeting.find(params[:meeting_id])
+	find_meeting
   end
-  
+
+  def find_meeting
+	@meeting = Meeting.find(params[:meeting_id])
+        raise ActiveRecord::RecordNotFound unless @meeting.project == @project
+	print @meeting.subject
+	print @meeting.convacator.name
+	print '-----'
+  end
+
   def find_project
     @project = Project.find(params[:id])
+    raise ActiveRecord::RecordNotFound unless @project
   end
 end
