@@ -1,4 +1,4 @@
 <h2><%=l(:label_new_meeting)%></h2>
-<% labelled_tabular_form_for :meeting, @meeting, :url => { :action => "create", :project_id => @project } do |f| %>
+<% labelled_tabular_form_for :meeting, @meeting, :url => { :action => "create", :id => @project } do |f| %>
 <%= render :partial => 'form', :locals => {:f => f} %>
 <% end %>

@@ -1,28 +1,41 @@
 class Meeting < ActiveRecord::Base
   def project
-  	issue.project;
+  	self.issue.project;
   end
   def project=(p)
-  	issue.project=p
+  	self.issue.project=p
   end
   def convacator
-  	issue.assigned_to
+  	self.issue.assigned_to
   end
   def convacator=(user)
-  	issue.assigned_to = user
+  	self.issue.assigned_to = user
   end
-  def date
-  	issue.start_date
+  def convacator_id
+	self.issue.assigned_to_id
   end
-  def date=(d)
-  	issue.start_date = d
+  def convacator_id=(id)
+	self.issue.assigned_to_id=id
   end
   def status
-  	issue.status
+  	self.issue.status
   end
   def status=(s)
-  	issue.status=s
+  	self.issue.status=s
   end
+  def agenda
+	self.issue.description
+  end
+  def agenda=(a)
+	self.issue.description=a
+  end
+  def subject
+	self.issue.subject
+  end
+  def subject=(s)
+	self.issue.subject=s
+  end
+  belongs_to :issue, :class_name => 'Issue', :foreign_key => 'issue_id'
   has_many :internal_participants, :class_name => 'InternalParticipant', :dependent => :delete_all
   has_many :internal_participant_users, :through => :internal_participants, :class_name => 'User', :source => :user, :uniq => true
   validates_presence_of :date, :place, :subject, :project, :issue, :convacator, :status
