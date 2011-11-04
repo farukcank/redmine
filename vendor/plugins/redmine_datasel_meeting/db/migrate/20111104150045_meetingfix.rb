@@ -1,4 +1,4 @@
-class CreateMeetings < ActiveRecord::Migration
+class Meetingfix < ActiveRecord::Migration
   def self.up
     create_table :meetings do |t|
       t.column :subject, :string, :null => false
