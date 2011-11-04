@@ -1,20 +1,17 @@
 class MeetingsController < ApplicationController
   unloadable
-
+  before_filter :find_project
 
   def index
-	@project = Project.find(params[:project_id])
 	@meetings = Meeting.find(:all, :conditions =>["project_id=?", @project.id])
   end
 
   def edit
-  	@project = Project.find(params[:project_id])
   	@meeting = Meeting.find(params[:meeting_id])
   	@meeting.convacator_id = @meeting.convacator.id
   end
   
   def update
-  	@project = Project.find(params[:project_id])
   	@meeting = Meeting.find(params[:meeting_id])
   	#@meeting.convacator = User.find params[:meeting][:convacator_id]
   	issue = @meeting.issue
@@ -29,7 +26,6 @@ class MeetingsController < ApplicationController
   end
   
   def create
-  	@project = Project.find(params[:project_id])
   	@meeting = Meeting.new(params[:meeting])
   	@meeting.project = @project
   	#@meeting.convacator = User.find params[:meeting][:convacator_id]
@@ -52,14 +48,18 @@ class MeetingsController < ApplicationController
   end
   
   def new
-  	@project = Project.find(params[:project_id])
-  	@meeting = Meeting.new()
+  	@meeting = Meeting.new
+  	@meeting.issue = Issue.new
+  	@meeting.project = project
   	@meeting.convacator = User.current
   	@meeting.date = Time.now
   end
 
   def show
-  	@project = Project.find(params[:project_id])
   	@meeting = Meeting.find(params[:meeting_id])
+  end
+  
+  def find_project
+    @project = Project.find(params[:id])
   end
 end

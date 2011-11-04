@@ -1,4 +1,4 @@
-<div class="contextual"><%= link_to 'New Meeting', { :action => 'new', :project_id => @project.identifier},:class => 'icon icon-add' %></div>
+<div class="contextual"><%= link_to 'New Meeting', { :action => 'new', :id => @project.identifier},:class => 'icon icon-add' %></div>
 <h2><%=l(:label_list_of_meeting)%></h2>
 <div class="autoscroll">
 	<table class="list">
@@ -8,9 +8,9 @@
 			</tr>
 			<% @meetings.each do |meeting| %>
 			<tr>
-				<td class="id"><%= link_to meeting.id, { :action => 'show', :meeting_id => meeting.id, :project_id => @project.identifier} %></td>
+				<td class="id"><%= link_to meeting.id, { :action => 'show', :meeting_id => meeting, :id => @project} %></td>
 				<td class="updated_on"><%= format_time(meeting.date) %></td>
-				<td class="subject"><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting.id, :project_id => @project.identifier} %></td>
+				<td class="subject"><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting, :id => @project} %></td>
 				<td class="assigned_to"><%= meeting.convacator.name %></td>
 				<td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
 			</tr>
