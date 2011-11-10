@@ -3,15 +3,10 @@
 </div>
 <h2><%=l(:label_meeting_details)%></h2>
 <%= render :partial => 'summary', :locals => {:meeting => @meeting} %>
+<h3>Content</h3>
+<div class="wiki">
+<%= textilizable @meeting, :content %>
+</div>
 <div class="contextual">
 <%= link_to(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :id => @project }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
 </div>
-<tr><th>Content</th></tr>
-<tr>
-	<td>
-		<div class="wiki">
-			<%= textilizable @meeting, :content %>
-		</div>
-	</td>
-</tr>
-</table>
