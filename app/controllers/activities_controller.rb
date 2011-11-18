@@ -63,7 +63,8 @@ class ActivitiesController < ApplicationController
   end
 
   private
-
+  # The private notes should be removed from events
+   events.delete_if { |e| e.is_a?(Journal) && e.private }
   # TODO: refactor, duplicated in projects_controller
   def find_optional_project
     return true unless params[:id]
