@@ -16,8 +16,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class ActivitiesController < ApplicationController
-  # The private notes should be removed from events
-   events.delete_if { |e| e.is_a?(Journal) && e.private }
   
   menu_item :activity
   before_filter :find_optional_project
@@ -46,6 +44,10 @@ class ActivitiesController < ApplicationController
 
     events = @activity.events(@date_from, @date_to)
 
+	# The private notes should be removed from events
+   events.delete_if { |e| e.is_a?(Journal) && e.private }
+  
+	
     if events.empty? || stale?(:etag => [@activity.scope, @date_to, @date_from, @with_subprojects, @author, events.first, User.current, current_language])
       respond_to do |format|
         format.html {
@@ -63,6 +65,8 @@ class ActivitiesController < ApplicationController
         }
       end
     end
+	
+	
 
   rescue ActiveRecord::RecordNotFound
     render_404
