@@ -26,6 +26,9 @@ class ActivitiesController < ApplicationController
     if params[:from]
       begin; @date_to = params[:from].to_date + 1; rescue; end
     end
+	
+	# The private notes should be removed from events
+   events.delete_if { |e| e.is_a?(Journal) && e.private }
 
     @date_to ||= Date.today + 1
     @date_from = @date_to - @days
@@ -63,8 +66,7 @@ class ActivitiesController < ApplicationController
   end
 
   private
-  # The private notes should be removed from events
-   events.delete_if { |e| e.is_a?(Journal) && e.private }
+  
   # TODO: refactor, duplicated in projects_controller
   def find_optional_project
     return true unless params[:id]
