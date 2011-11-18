@@ -286,7 +286,8 @@ private
     @time_entry.attributes = params[:time_entry]
 
     @notes = params[:notes] || (params[:issue].present? ? params[:issue][:notes] : nil)
-    @issue.init_journal(User.current, @notes)
+    @private_message = params[:private_message] || false
+    @issue.init_journal(User.current, @notes, @private_message)
     @issue.safe_attributes = params[:issue]
   end
 

@@ -16,16 +16,20 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class ActivitiesController < ApplicationController
+  
   menu_item :activity
   before_filter :find_optional_project
   accept_rss_auth :index
 
+  
   def index
     @days = Setting.activity_days_default.to_i
 
     if params[:from]
       begin; @date_to = params[:from].to_date + 1; rescue; end
     end
+	
+	
 
     @date_to ||= Date.today + 1
     @date_from = @date_to - @days
@@ -40,6 +44,10 @@ class ActivitiesController < ApplicationController
 
     events = @activity.events(@date_from, @date_to)
 
+	# The private notes should be removed from events
+   events.delete_if { |e| e.is_a?(Journal) && e.private }
+  
+	
     if events.empty? || stale?(:etag => [@activity.scope, @date_to, @date_from, @with_subprojects, @author, events.first, User.current, current_language])
       respond_to do |format|
         format.html {
@@ -57,13 +65,15 @@ class ActivitiesController < ApplicationController
         }
       end
     end
+	
+	
 
   rescue ActiveRecord::RecordNotFound
     render_404
   end
 
   private
-
+  
   # TODO: refactor, duplicated in projects_controller
   def find_optional_project
     return true unless params[:id]

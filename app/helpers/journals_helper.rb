@@ -39,4 +39,12 @@ module JournalsHelper
     onclick = "new Ajax.Request('#{url_for(url)}', {asynchronous:true, evalScripts:true, method:'get'}); return false;"
     link_to text, '#', options.merge(:onclick => onclick)
   end
+
+  def only_private_messages?(journals)
+     journals.each do |journal|
+         return false if ! journal.private
+     end
+
+     true
+  end
 end
