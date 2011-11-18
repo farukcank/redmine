@@ -11,9 +11,9 @@
 <% end %>
 
 <% if internal_participant.invited %> 
-<%= link_to_remote '<small><small>Invited</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_uninvited', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant} %> 
+<%= link_to_remote '<small><small>Invited</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_uninvited', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant.id} %> 
 <% else %>
-<%= link_to_remote '<small><small>Uninvited</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_invited', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant} %>
+<%= link_to_remote '<small><small>Uninvited</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_invited', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant.id} %>
 <% end %>
 
 </label>
