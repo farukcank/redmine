@@ -16,10 +16,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class ActivitiesController < ApplicationController
+  # The private notes should be removed from events
+   events.delete_if { |e| e.is_a?(Journal) && e.private }
+  
   menu_item :activity
   before_filter :find_optional_project
   accept_rss_auth :index
 
+  
   def index
     @days = Setting.activity_days_default.to_i
 
@@ -27,8 +31,7 @@ class ActivitiesController < ApplicationController
       begin; @date_to = params[:from].to_date + 1; rescue; end
     end
 	
-	# The private notes should be removed from events
-   events.delete_if { |e| e.is_a?(Journal) && e.private }
+	
 
     @date_to ||= Date.today + 1
     @date_from = @date_to - @days
