@@ -1,29 +1,52 @@
+<% if authorize_for('internal_participants', 'create') %>
 <div class="contextual">
 	<%= toggle_link l(:button_add), 'add-internal-participant-form', {:focus => 'internal_participant_user_id'} %>
 </div>
+<% end %>
 <p class="tabular">
 <% meeting.internal_participants.each do |internal_participant| %>
 <label class="floating"><%= link_to_user(internal_participant.user) %>
 
 <% if internal_participant.attended %>
+<% if authorize_for('internal_participants', 'make_not_attended') %>
 <%= link_to_remote '<small><small>Attended</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_not_attended', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant} %>  
-<% else %><%= link_to_remote '<small><small>Not attended</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_attended', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant} %>
+<% else %>
+<small><small>Attended</small></small>
+<% end %>
+<% else %>
+<% if authorize_for('internal_participants', 'make_attended') %>
+<%= link_to_remote '<small><small>Not attended</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_attended', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant} %>
+<% else %>
+<small><small>Not attended</small></small>
+<% end %>
 <% end %>
 
 <% if internal_participant.invited %> 
-<%= link_to_remote '<small><small>Invited</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_uninvited', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant.id} %> 
+<% if authorize_for('internal_participants', 'make_uninvited') %>
+<%= link_to_remote '<small><small>Invited</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_uninvited', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant} %> 
 <% else %>
-<%= link_to_remote '<small><small>Uninvited</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_invited', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant.id} %>
+<small><small>Invited</small></small>
+<% end %>
+<% else %>
+<% if authorize_for('internal_participants', 'make_invited') %>
+<%= link_to_remote '<small><small>Uninvited</small></small>', :url=>{:controller=>'internal_participants', :action=>'make_invited', :id=>@project, :meeting_id => @meeting, :internal_participant_id=>internal_participant} %>
+<% else %>
+<small><small>Uninvited</small></small>
+<% end %>
 <% end %>
 
 </label>
 
 <% end %>
 </p>
-<div><p>&nbsp;</p><% remote_form_for(:internal_participant, @internal_participant, 
-                 :url => {:controller => 'internal_participants', :action => 'create', :meeting_id => meeting},
+<div><p>&nbsp;</p>
+<% if authorize_for('internal_participants', 'create') %>
+<% remote_form_for(:internal_participant, @internal_participant, 
+                 :url => {:controller => 'internal_participants', :action => 'create', :id => @project, :meeting_id => meeting},
                  :method => :post,
                  :complete => "Form.Element.focus('internal_participant_user_id');",
                  :html => {:id => 'add-internal-participant-form', :style => (@internal_participant ? '' : 'display: none;')}) do |f| %>
 <%= render :partial => 'internal_participants/add_form', :locals => {:f => f}%>
-<% end %><p>&nbsp;</p></div>
+<% end %>
+<% end %>
+<p>&nbsp;</p></div>

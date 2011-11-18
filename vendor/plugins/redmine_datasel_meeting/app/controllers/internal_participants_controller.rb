@@ -1,7 +1,9 @@
 class InternalParticipantsController < ApplicationController
   unloadable
+  before_filter :find_project
+  before_filter :authorize
+  verify :method => :post
   def create
-  	@meeting = Meeting.find(params[:meeting_id])
   	@internal_participant = InternalParticipant.new(params[:internal_participant])
   	@internal_participant.meeting = @meeting
 	@internal_participant.invited = true
@@ -54,7 +56,6 @@ class InternalParticipantsController < ApplicationController
   end
   private
   def process_internal_participant
-        @meeting = Meeting.find(params[:meeting_id])
         puts params[:internal_participant_id]
         internal_participant = InternalParticipant.find(params[:internal_participant_id])
         if internal_participant.meeting != @meeting
@@ -73,5 +74,12 @@ class InternalParticipantsController < ApplicationController
                         end
                 end
         end
+  end
+  def find_project
+    @project = Project.find(params[:id])
+    raise ActiveRecord::RecordNotFound unless @project
+    @meeting = Meeting.find(params[:meeting_id])
+    raise ActiveRecord::RecordNotFound unless @meeting
+    raise ActiveRecord::RecordNotFound unless @meeting.project == @project
   end
 end

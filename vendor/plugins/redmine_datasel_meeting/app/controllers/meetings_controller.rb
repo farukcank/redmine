@@ -1,7 +1,9 @@
 class MeetingsController < ApplicationController
   unloadable
   before_filter :find_project
+  before_filter :authorize
 
+  verify :method => :post, :only => [:create, :update], :render => { :nothing => true, :status => :method_not_allowed }
   def index
 	@meetings = Meeting.find(:all, :joins => "join issues on issues.id = meetings.issue_id", :conditions => ["project_id=?", @project.id])
   end
@@ -68,11 +70,8 @@ class MeetingsController < ApplicationController
   def find_meeting
 	@meeting = Meeting.find(params[:meeting_id])
         raise ActiveRecord::RecordNotFound unless @meeting.project == @project
-	print @meeting.subject
-	print @meeting.convacator.name
-	print '-----'
   end
-
+  private
   def find_project
     @project = Project.find(params[:id])
     raise ActiveRecord::RecordNotFound unless @project

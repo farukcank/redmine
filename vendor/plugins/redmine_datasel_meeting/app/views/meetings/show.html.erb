@@ -1,5 +1,5 @@
 <div class="contextual">
-<%= link_to(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :id => @project }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
+<%= link_to_remote_if_authorized(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :id => @project }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
 </div>
 <h2><%=l(:label_meeting_details)%></h2>
 <%= render :partial => 'summary', :locals => {:meeting => @meeting} %>
@@ -8,5 +8,5 @@
 <%= textilizable @meeting, :content %>
 </div>
 <div class="contextual">
-<%= link_to(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :id => @project }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
+<%= link_to_remote_if_authorized(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :id => @project }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
 </div>
