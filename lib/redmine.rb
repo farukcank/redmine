@@ -85,6 +85,8 @@ Redmine::AccessControl.map do |map|
     map.permission :view_issue_watchers, {}
     map.permission :add_issue_watchers, {:watchers => :new}
     map.permission :delete_issue_watchers, {:watchers => :destroy}
+    # Private messages
+    map.permission :view_private_messages, {}
   end
   
   map.project_module :time_tracking do |map|

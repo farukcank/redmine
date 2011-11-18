@@ -90,10 +90,13 @@
 <% end %>
 
 <% if @journals.present? %>
-<div id="history">
-<h3><%=l(:label_history)%></h3>
-<%= render :partial => 'history', :locals => { :issue => @issue, :journals => @journals } %>
-</div>
+  <% view_private = User.current.allowed_to?(:view_private_messages, @project) %>
+  <% if ! only_private_messages?(@journals) || view_private %>
+    <div id="history">
+    <h3><%=l(:label_history)%></h3>
+    <%= render :partial => 'history', :locals => { :issue => @issue, :journals => @journals } %>
+    </div>
+  <% end %>
 <% end %>
 
 

@@ -401,8 +401,8 @@ class Issue < ActiveRecord::Base
     end
   end
 
-  def init_journal(user, notes = "")
-    @current_journal ||= Journal.new(:journalized => self, :user => user, :notes => notes)
+  def init_journal(user, notes = "", private = false)
+    @current_journal ||= Journal.new(:journalized => self, :user => user, :notes => notes, :private => private)
     @issue_before_change = self.clone
     @issue_before_change.status = self.status
     @custom_values_before_change = {}

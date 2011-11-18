@@ -16,6 +16,9 @@
     <%= link_to l(:button_cancel), '#', :onclick => "Element.remove('journal-#{@journal.id}-form'); " +
                                                     "Element.show('journal-#{@journal.id}-notes'); return false;" %></p>
 
+    <%= check_box_tag :private_message, true, @journal.private, :id => "private_message_#{@journal.id}" %>
+    <%= label_tag "private_message_#{@journal.id}", 'Private message', :style => 'font-weight:bold;' %>
+
     <div id="journal_<%= @journal.id %>_preview" class="wiki"></div>
 <% end %>
 <%= wikitoolbar_for "journal_#{@journal.id}_notes" %>

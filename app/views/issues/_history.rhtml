@@ -1,10 +1,27 @@
 <% reply_links = authorize_for('issues', 'edit') -%>
+<% view_private = User.current.allowed_to?(:view_private_messages, @project) %>
+<% @skipped = 0 %>
+
 <% for journal in journals %>
-  <div id="change-<%= journal.id %>" class="<%= journal.css_classes %>">
-    <h4><div class="journal-link"><%= link_to "##{journal.indice}", :anchor => "note-#{journal.indice}" %></div>
+
+  <% private = journal.private %>
+
+  <% if private %>
+    <% if ! view_private %>
+      <% @skipped += 1 %>
+      <% next %>
+    <% end %>
+  <% end %>
+
+  <div id="change-<%= journal.id %>" class="<%= journal.css_classes %> <%= 'private' if journal.private %>">
+    <h4><div class="journal-link"><%= link_to "##{journal.indice - @skipped}", :anchor => "note-#{journal.indice - @skipped}" %></div>
     <%= avatar(journal.user, :size => "24") %>
-    <%= content_tag('a', '', :name => "note-#{journal.indice}")%>
-		<%= authoring journal.created_on, journal.user, :label => :label_updated_time_by %></h4>
+    <%= content_tag('a', '', :name => "note-#{journal.indice - @skipped}")%>
+		<%= authoring journal.created_on, journal.user, :label => :label_updated_time_by %>
+    <% if journal.private %>
+      <span>(private)</span>
+    <% end %>
+    </h4>
     
     <% if journal.details.any? %>
     <ul class="details">
