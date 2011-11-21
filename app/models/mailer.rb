@@ -58,6 +58,7 @@ class Mailer < ActionMailer::Base
   #   Mailer.deliver_issue_edit(journal) => sends an email to issue recipients
   def issue_edit(journal)
     issue = journal.journalized.reload
+    private = journal[:private]
     redmine_headers 'Project' => issue.project.identifier,
                     'Issue-Id' => issue.id,
                     'Issue-Author' => issue.author.login
@@ -65,9 +66,16 @@ class Mailer < ActionMailer::Base
     message_id journal
     references issue
     @author = journal.user
-    recipients issue.recipients
+
+    @recipients ||= []
+    watchers = issue.watcher_recipients - @recipients
+
+    processed_recipients = prepare_receivers issue.recipients, issue.project, private
+    processed_watchers = prepare_receivers watchers, issue.project, private
+
+    recipients processed_recipients
     # Watchers in cc
-    cc(issue.watcher_recipients - @recipients)
+    cc(processed_watchers)
     s = "[#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] "
     s << "(#{issue.status.name}) " if journal.new_value_for('status_id')
     s << issue.subject
@@ -448,6 +456,25 @@ class Mailer < ActionMailer::Base
   def mylogger
     RAILS_DEFAULT_LOGGER
   end
+
+  # Method for recipients or watchers preparation
+  def prepare_receivers(receivers, project, private)
+      processed_receivers = Array.new()
+
+      receivers.each do |recepient|
+         current_user = User.find_by_mail(recepient)
+         can_see_private_messages = current_user.allowed_to?(:view_private_messages, project)
+
+         if private
+             next if ! can_see_private_messages
+         end
+
+         processed_receivers << recepient
+      end
+
+      processed_receivers
+   end
+
 end
 
 # Patch TMail so that message_id is not overwritten

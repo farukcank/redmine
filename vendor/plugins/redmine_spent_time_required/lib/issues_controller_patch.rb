@@ -27,7 +27,6 @@ module RedmineSpentTimeRequired
           end
         end
       end
-
     end
   end
 end
