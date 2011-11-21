@@ -7,6 +7,12 @@
 <div class="wiki">
 <%= textilizable @meeting, :content %>
 </div>
+<h3>Decisions</h3>
+<table>
+<% for relation in @meeting.issue.relations_from do%>
+<tr><td><%= link_to relation.issue_to.subject, :controller => 'issues', :action => 'show', :id => relation.issue_to %></td><tr>
+<% end %>
+</table>
 <div class="contextual">
 <%= link_to_if_authorized(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :id => @project }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
 </div>
