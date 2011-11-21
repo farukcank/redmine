@@ -1,4 +1,4 @@
-class SettingsController < ApplicationController
+class ProjectStateController < ApplicationController
   unloadable
   before_filter :find_project
   before_filter :require_admin

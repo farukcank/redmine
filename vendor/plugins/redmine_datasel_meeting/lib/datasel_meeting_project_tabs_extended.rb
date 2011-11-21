@@ -19,7 +19,7 @@ module DataselMeetingProjectTabsExtended
         def project_settings_tabs_with_datasel_meeting
             tabs = project_settings_tabs_without_datasel_meeting
             if @project.module_enabled?("datasel_meeting")
-              tabs.push({:name => 'datasel_meeting', :controller => :settings, :action => :save, :partial => 'settings/settings', :label => :datasel_meeting})
+              tabs.push({:name => 'datasel_meeting', :controller => :project_state, :action => :save, :partial => 'project_state/project_state', :label => :datasel_meeting})
             end
             return tabs
         end
