@@ -1,4 +1,4 @@
-<div class="contextual"><%= link_to 'New Meeting', { :action => 'new', :id => @project.identifier},:class => 'icon icon-add' %></div>
+<div class="contextual"><%= link_to_if_authorized 'New Meeting', { :controller => 'meetings', :action => 'new', :id => @project},:class => 'icon icon-add' %></div>
 <h2><%=l(:label_list_of_meeting)%></h2>
 <div class="autoscroll">
 	<table class="list">

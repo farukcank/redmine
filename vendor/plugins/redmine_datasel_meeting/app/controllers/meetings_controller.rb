@@ -27,6 +27,7 @@ class MeetingsController < ApplicationController
   		end
 		issue = @meeting.issue
                 issue.save!
+		InternalParticipantsController.setTimeEntriesOfMeeting!(@meeting)
 	end
   end
   
@@ -46,6 +47,7 @@ class MeetingsController < ApplicationController
 		issue.status = IssueStatus.default
 		issue.priority_id = @project.datasel_meeting_priority_id
   		issue.save!
+		InternalParticipantsController.addTimeEntryToUser!(@meeting, @meeting.convacator_id)
   		if @meeting.save
   			redirect_to :action => 'show', :id => @project, :meeting_id => @meeting.id
   		else

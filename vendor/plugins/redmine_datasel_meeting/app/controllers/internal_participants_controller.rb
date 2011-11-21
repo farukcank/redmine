@@ -4,11 +4,13 @@ class InternalParticipantsController < ApplicationController
   before_filter :authorize
   verify :method => :post
   def create
+	InternalParticipant.transaction do
   	@internal_participant = InternalParticipant.new(params[:internal_participant])
   	@internal_participant.meeting = @meeting
 	@internal_participant.invited = true
 	@internal_participant.attended = true
   	@internal_participant.save
+	InternalParticipantsController.addTimeEntryToUser!(@meeting, @internal_participant.user_id)
   	respond_to do |format|
       		format.html { redirect_to :controller => 'meetings', :action => 'show', :meeting_id => @meeting, :project_id => @meeting.project.id }
       		format.js do
@@ -21,34 +23,39 @@ class InternalParticipantsController < ApplicationController
         		end
       		end
     	end
+	end
   end
   def make_invited
         process_internal_participant do |p|
                 p.invited = true
-		p.save
+		p.save!
         end
   end
   def make_uninvited
 	process_internal_participant do |p|
 		p.invited = false
 		if p.attended
-			p.save
+			p.save!
 		else
 			p.delete
 		end
 	end
   end
   def make_attended
-        process_internal_participant do |p|
-                p.attended = true
-                p.save
-        end
+	InternalParticipant.transaction do
+        	process_internal_participant do |p|
+                	p.attended = true
+                	p.save!
+			InternalParticipantsController.addTimeEntryToUser!(@meeting, p.user_id)
+        	end
+	end
   end
   def make_not_attended
         process_internal_participant do |p|
                 p.attended = false
+		InternalParticipantsController.removeTimeEntryFromUser!(@meeting, p.user_id)
 		if p.invited
-                	p.save
+                	p.save!
 		else
 			p.delete
 		end
@@ -81,5 +88,25 @@ class InternalParticipantsController < ApplicationController
     @meeting = Meeting.find(params[:meeting_id])
     raise ActiveRecord::RecordNotFound unless @meeting
     raise ActiveRecord::RecordNotFound unless @meeting.project == @project
+  end
+  def self.addTimeEntryToUser!(meeting, user_id)
+                timeEntry = TimeEntry.new :activity_id => meeting.project.datasel_meeting_activity_id, :hours => meeting.hours, :created_on => Time.now, :spent_on => meeting.date
+                timeEntry.user_id = user_id
+                timeEntry.issue = meeting.issue
+                timeEntry.save!
+  end
+  def self.removeTimeEntryFromUser!(meeting, user_id)
+		cond = ARCondition.new
+		cond << "#{TimeEntry.table_name}.issue_id = #{meeting.issue.id} and #{TimeEntry.table_name}.user_id = #{user_id}"
+		timeEntries = TimeEntry.find(:all,:conditions => cond.conditions)
+		timeEntries.each {|timeEntry| timeEntry.delete}
+  end
+  def self.setTimeEntriesOfMeeting!(meeting)
+                cond = ARCondition.new
+                cond << "#{TimeEntry.table_name}.issue_id = #{meeting.issue.id}"
+                timeEntries = TimeEntry.find(:all,:conditions => cond.conditions)
+                timeEntries.each {|timeEntry| timeEntry.delete}
+		InternalParticipantsController.addTimeEntryToUser!(meeting,meeting.convacator_id)
+		meeting.internal_participants.each {|p| InternalParticipantsController.addTimeEntryToUser!(meeting,p.user_id) if p.attended}
   end
 end
