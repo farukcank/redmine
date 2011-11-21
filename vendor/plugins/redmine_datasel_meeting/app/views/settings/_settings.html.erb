@@ -1,0 +1,22 @@
+<div class="box">
+	<% form_tag({:controller => "settings", :action => "save", :id => @project},
+		:method=>:post) do %>
+	<div>
+<% 
+priority = nil unless @project.datasel_meeting_priority_id
+priority = IssuePriority.find(@project.datasel_meeting_priority_id) if @project.datasel_meeting_priority_id
+priorityName = nil unless priority
+priorityName = priority.name if priority
+%>
+                <table>
+		<tr><td><%= l(:label_tracker) %>:</td>
+		<td><%= select_tag("tracker_id", options_for_select(@project.trackers.collect {|t| [t.name, t.id]})) %></td></tr>
+		<tr><td><%= l(:label_priority) %>:</td>
+                <td><%= select_tag("priority_id", options_from_collection_for_select(IssuePriority.all, :id, :name, :selected => priorityName)) %></td></tr>
+                <tr><td><%= l(:label_cross_project) %>:</td>
+                <td><%= check_box_tag("cross_project","true", @project.datasel_meeting_cross_project) %></td></tr>
+                <tr><td colspan='2'><%= submit_tag(l(:submit_save), :title => l(:title_save_preferences)) %></td></tr>
+		</table>
+	</div>
+	<% end %>
+</div>

@@ -8,3 +8,6 @@ en:
   field_place: "Place"
   field_date: "Date"
   field_agenda: "Agenda"
+  datasel_meeting: "Meeting"
+  label_priority: "Priority"
+  label_cross_project: "Cross Project"
