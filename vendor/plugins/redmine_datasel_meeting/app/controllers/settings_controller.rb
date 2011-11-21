@@ -7,6 +7,7 @@ class SettingsController < ApplicationController
 	@project.datasel_meeting_cross_project = params[:cross_project]
         @project.datasel_meeting_priority_id = params[:priority_id]
 	@project.datasel_meeting_tracker_id = params[:tracker_id]
+	@project.datasel_meeting_activity_id = params[:activity_id]
 	@project.save!
 	flash[:notice] = l(:notice_your_preferences_were_saved)
 	redirect_to :controller => "projects", :action => 'settings', :tab => 'datasel_meeting', :id => @project
