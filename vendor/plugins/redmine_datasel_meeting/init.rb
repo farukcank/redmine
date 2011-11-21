@@ -18,7 +18,7 @@ Redmine::Plugin.register :redmine_datasel_meeting do
   #permission :meetings, { :meetings => [:index, :show, :new, :edit] }, :public => true
   project_module :datasel_meeting do
     permission :view_meeting, {:meetings => [:show,:index]}
-    permission :edit_meeting, {:meetings => [:edit,:create],:internal_participants => [:make_invited,:make_uninvited,:make_attended,:make_not_attended,:create]}
+    permission :edit_meeting, {:meetings => [:edit,:create,:new,:update],:internal_participants => [:make_invited,:make_uninvited,:make_attended,:make_not_attended,:create]}
   end
   menu :project_menu, :meetings, { :controller => 'meetings', :action => 'index' }, :caption => 'Meetings', :after => :activity, :param => :id
 end

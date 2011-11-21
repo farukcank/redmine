@@ -19,7 +19,7 @@ class MeetingsController < ApplicationController
   		issue = @meeting.issue
   		issue.subject = @meeting.subject
   		issue.description = @meeting.agenda
-  		issue.save
+  		issue.save!
   		if @meeting.update_attributes(params[:meeting])
   			redirect_to :action => 'show', :id => @project, :meeting_id => @meeting.id
   		else
@@ -39,12 +39,12 @@ class MeetingsController < ApplicationController
 		@meeting.attributes=params[:meeting]
   		issue.subject = @meeting.subject
   		issue.description = @meeting.agenda
-  		issue.tracker = @project.trackers.find(:first)
+  		issue.tracker_id = @project.datasel_meeting_tracker_id
 		issue.project = @project
 		issue.author = User.current
 		#issue.assigned_to_id = @meeting.convacator_id
 		issue.status = IssueStatus.default
-		issue.priority = IssuePriority.all[0]
+		issue.priority_id = @project.datasel_meeting_priority_id
   		issue.save!
   		if @meeting.save
   			redirect_to :action => 'show', :id => @project, :meeting_id => @meeting.id
