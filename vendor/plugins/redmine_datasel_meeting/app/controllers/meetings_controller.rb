@@ -54,6 +54,10 @@ class MeetingsController < ApplicationController
   			render :action => 'new'
 			raise ActiveRecord::Rollback
   		end
+		journal = Journal.new :notes => "{{meeting(#{@meeting.id})}}"
+                journal.user = @meeting.convacator
+                journal.journalized = issue
+                journal.save!
 	end
   end
   
