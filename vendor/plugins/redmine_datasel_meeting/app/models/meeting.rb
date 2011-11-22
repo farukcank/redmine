@@ -24,6 +24,12 @@ class Meeting < ActiveRecord::Base
   def status=(s)
   	self.issue.status=s if self.issue
   end
+  def status_id
+        self.issue.status_id if self.issue
+  end
+  def status_id=(s)
+        self.issue.status_id=s if self.issue
+  end
   def agenda
 	self.issue.description if self.issue
   end

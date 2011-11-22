@@ -90,10 +90,12 @@ class InternalParticipantsController < ApplicationController
     raise ActiveRecord::RecordNotFound unless @meeting.project == @project
   end
   def self.addTimeEntryToUser!(meeting, user_id)
+		if meeting.status.is_closed?
                 timeEntry = TimeEntry.new :activity_id => meeting.project.datasel_meeting_activity_id, :hours => meeting.hours, :created_on => Time.now, :spent_on => meeting.date
                 timeEntry.user_id = user_id
                 timeEntry.issue = meeting.issue
                 timeEntry.save!
+		end
   end
   def self.removeTimeEntryFromUser!(meeting, user_id)
 		cond = ARCondition.new
@@ -106,7 +108,9 @@ class InternalParticipantsController < ApplicationController
                 cond << "#{TimeEntry.table_name}.issue_id = #{meeting.issue.id}"
                 timeEntries = TimeEntry.find(:all,:conditions => cond.conditions)
                 timeEntries.each {|timeEntry| timeEntry.delete}
+		if meeting.status.is_closed?
 		InternalParticipantsController.addTimeEntryToUser!(meeting,meeting.convacator_id)
 		meeting.internal_participants.each {|p| InternalParticipantsController.addTimeEntryToUser!(meeting,p.user_id) if p.attended}
+		end
   end
 end

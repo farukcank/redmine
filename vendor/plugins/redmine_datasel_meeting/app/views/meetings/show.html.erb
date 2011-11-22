@@ -8,6 +8,9 @@
 <%= textilizable @meeting, :content %>
 </div>
 <h3>Decisions</h3>
+<% if @meeting.issue.relations_from.empty? && @meeting.issue.relations_to.empty? %>
+There are no decisions.
+<% else %>
 <% decisionNo = 0 %>
 <table>
 <tr>
@@ -35,6 +38,7 @@
 <tr>
 <% end %>
 </table>
+<% end %>
 <div class="contextual">
 <%= link_to_if_authorized(l(:button_update), {:controller => 'meetings', :action => 'edit', :meeting_id => @meeting.id, :id => @project }, :class => 'icon icon-edit', :accesskey => accesskey(:edit)) %>
 </div>
