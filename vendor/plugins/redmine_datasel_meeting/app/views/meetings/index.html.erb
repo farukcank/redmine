@@ -4,7 +4,7 @@
 	<table class="list">
 		<tbody>
 			<tr>
-				<th>#</th><th>Date</th><th>Subject</th><th>Convenor</th><th>Issue</th>
+				<th>#</th><th><%=l(:field_date)%></th><th><%=l(:field_subject)%></th><th><%=l(:field_status)%><th><%=l(:field_convacator)%></th><th><%=l(:field_issue)%></th>
 			</tr>
 			<% 
                         currentIndex = 0
@@ -16,6 +16,7 @@
 				<td class="id <%= oddEven %>"><%= link_to meeting.id, { :action => 'show', :meeting_id => meeting, :id => @project} %></td>
 				<td class="updated_on <%= oddEven %>"><%= format_time(meeting.date) %></td>
 				<td class="subject <%= oddEven %>"><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting, :id => @project} %></td>
+				<td class="status <%= oddEven %>"><%= meeting.status.name %></td>
 				<td class="assigned_to <%= oddEven %>"><%= meeting.convacator.name %></td>
 				<td class="id <%= oddEven %>"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
 			</tr>
