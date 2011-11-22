@@ -8,9 +8,31 @@
 <%= textilizable @meeting, :content %>
 </div>
 <h3>Decisions</h3>
+<% decisionNo = 0 %>
 <table>
+<tr>
+	<th>#</th>
+	<th>Subject</th>
+	<th>Assignee</th>
+	<th>Status</th>
+</tr>
 <% for relation in @meeting.issue.relations_from do%>
-<tr><td><%= link_to relation.issue_to.subject, :controller => 'issues', :action => 'show', :id => relation.issue_to %></td><tr>
+<tr>
+	<% decisionNo = decisionNo + 1 %>
+	<td><%= decisionNo %></td>
+	<td><%= link_to relation.issue_to.subject, :controller => 'issues', :action => 'show', :id => relation.issue_to %></td>
+	<td><%= link_to_user relation.issue_to.assigned_to %></td>
+	<td><%= relation.issue_to.status.name %></td>
+<tr>
+<% end %>
+<% for relation in @meeting.issue.relations_to do%>
+<tr>
+	<% decisionNo = decisionNo + 1 %>
+        <td><%= decisionNo %></td>
+        <td><%= link_to relation.issue_from.subject, :controller => 'issues', :action => 'show', :id => relation.issue_from %></td>
+        <td><%= link_to_user relation.issue_from.assigned_to %></td>
+        <td><%= relation.issue_from.status.name %></td>
+<tr>
 <% end %>
 </table>
 <div class="contextual">
