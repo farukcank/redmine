@@ -5,7 +5,7 @@ class MeetingsController < ApplicationController
 
   verify :method => :post, :only => [:create, :update], :render => { :nothing => true, :status => :method_not_allowed }
   def index
-	@meetings = Meeting.find(:all, :joins => "join issues on issues.id = meetings.issue_id", :conditions => ["project_id=?", @project.id])
+	@meetings = Meeting.find(:all, :joins => "join issues on issues.id = meetings.issue_id", :conditions => ["project_id=?", @project.id], :order => 'date').reverse
   end
 
   def edit
