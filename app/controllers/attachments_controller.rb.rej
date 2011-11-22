@@ -1,0 +1,32 @@
+***************
+*** 21,34 ****
+  
+    def download
+      # images are sent inline
+-     send_file @attachment.diskfile, :filename => filename_for_content_disposition(@attachment.filename),
+                                      :type => @attachment.content_type, 
+                                      :disposition => (@attachment.image? ? 'inline' : 'attachment')
+    rescue
+      # in case the disk file was deleted
+      render_404
+    end
+-  
+  private
+    def find_project
+      @attachment = Attachment.find(params[:id])
+--- 21,35 ----
+  
+    def download
+      # images are sent inline
++     send_file params[:thumb] ? @attachment.thumbfile : @attachment.diskfile, 
++                                     :filename => filename_for_content_disposition(@attachment.filename),
+                                      :type => @attachment.content_type, 
+                                      :disposition => (@attachment.image? ? 'inline' : 'attachment')
+    rescue
+      # in case the disk file was deleted
+      render_404
+    end
++ 
+  private
+    def find_project
+      @attachment = Attachment.find(params[:id])

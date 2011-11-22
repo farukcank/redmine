@@ -1,0 +1,41 @@
+***************
+*** 51,56 ****
+      nil
+    end
+  
+    # Copy temp file to its final location
+    def before_save
+      if @temp_file && (@temp_file.size > 0)
+--- 51,66 ----
+      nil
+    end
+  
++   def make_thumbnail
++     img = Magick::Image.read(diskfile).first
++     thumb = img.thumbnail(75,75)
++     thumb.write thumbfile
++   end
++ 
++   def thumbfile
++     "#{File.dirname(diskfile)}/thumb_#{File.basename(diskfile)}"
++   end
++ 
+    # Copy temp file to its final location
+    def before_save
+      if @temp_file && (@temp_file.size > 0)
+***************
+*** 59,64 ****
+          f.write(@temp_file.read)
+        end
+        self.digest = Digest::MD5.hexdigest(File.read(diskfile))
+      end
+      # Don't save the content type if it's longer than the authorized length
+      if self.content_type && self.content_type.length > 255
+--- 69,75 ----
+          f.write(@temp_file.read)
+        end
+        self.digest = Digest::MD5.hexdigest(File.read(diskfile))
++ 			make_thumbnail if image? and Object.const_defined?(:Magick)
+      end
+      # Don't save the content type if it's longer than the authorized length
+      if self.content_type && self.content_type.length > 255

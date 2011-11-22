@@ -1,0 +1,19 @@
+***************
+*** 1,6 ****
+  <div class="attachments">
+- <% for attachment in attachments %>
+- <p><%= link_to attachment.filename, {:controller => 'attachments', :action => 'download', :id => attachment }, :class => 'icon icon-attachment' -%>
+  <%= h(" - #{attachment.description}") unless attachment.description.blank? %>
+    <span class="size">(<%= number_to_human_size attachment.filesize %>)</span>
+    <% if options[:delete_url] %>
+--- 1,10 ----
+  <div class="attachments">
++ <% attachments.each do |attachment| -%>
++ <% if attachment.image? and File.exist?(attachment.thumbfile) -%>
++ <p><%= link_to image_tag(url_for(:controller => :attachments,:action => :download,:thumb => 1,:id => attachment))+' '+attachment.filename, {:controller => 'attachments', :action => 'download', :id => attachment } -%>
++ <% else -%>
++ <p><%= link_to attachment.filename, {:controller => 'attachments', :action => 'download', :id => attachment }, :class => 'icon icon-attachment' %>
++ <% end -%>
+  <%= h(" - #{attachment.description}") unless attachment.description.blank? %>
+    <span class="size">(<%= number_to_human_size attachment.filesize %>)</span>
+    <% if options[:delete_url] %>
