@@ -10,6 +10,7 @@ class MeetingsController < ApplicationController
 
   def edit
 	find_meeting
+	@allowed_statuses = @meeting.issue.new_statuses_allowed_to(User.current)
   end
   
   def update
@@ -66,7 +67,10 @@ class MeetingsController < ApplicationController
   	@meeting.issue = Issue.new
   	@meeting.project = @project
   	@meeting.convacator = User.current
+	@meeting.issue.tracker_id = @project.datasel_meeting_tracker_id
+	@meeting.issue.priority_id = @project.datasel_meeting_priority_id
   	@meeting.date = Time.now
+	@allowed_statuses = @meeting.issue.new_statuses_allowed_to(User.current)
   end
 
   def show

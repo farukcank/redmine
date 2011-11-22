@@ -2,6 +2,7 @@
 <p><%= f.text_field :subject, :size => 60, :required => true %></p>
 <p><%= f.text_field :place, :size => 60, :required => true %></p>
 <p><%= f.text_field :date, :size => 24, :required => true %><%= calendar_for('meeting_date') %></p>
+<p><%= f.select :status_id, (@allowed_statuses.collect {|p| [p.name, p.id]}), :required => true %></p>
 <p><%= f.text_field :hours, :size => 3, :required => true %></p>
 <p><%= f.select :convacator_id, (User.find(:all).collect {|m| [m.name, m.id]}), :include_blank => false, :required => true %></p>
 <p><%= f.text_area :agenda, :rows => 10, :class => 'wiki-edit' %></p>
