@@ -5,21 +5,21 @@
 	<table class="attributes">
 		<tbody>
 			<tr>
-				<th>Place</th><td><%= meeting.place %></td>
-				<th>Date</th><td><%= format_time(meeting.date) %></td></tr>
+				<th><%=l(:field_place)%></th><td><%= meeting.place %></td>
+				<th><%=l(:field_date)%></th><td><%= format_time(meeting.date) %></td></tr>
 			<tr>
-				<th>Issue</th><td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
-				<th>Convacator</th><td><%= meeting.convacator.name %></td>
+				<th><%=l(:field_issue)%></th><td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
+				<th><%=l(:field_convacator)%></th><td><%= meeting.convacator.name %></td>
 			</tr>
 		</tbody>
 	</table>
 	<hr/>
-	<p><strong>Participants</strong></p>
+	<p><strong><%=l(:field_internal_participants)%></strong></p>
 	<div id="internalparticipants">
 		<%= render :partial => 'internal_participants', :locals => {:meeting => meeting}%>
 	</div>
 	<hr/>
-	<p><strong>Agenda</strong></p>
+	<p><strong><%=l(:field_agenda)%></strong></p>
 	<div class="wiki">
 		<%= textilizable meeting, :agenda %>
 	</div>

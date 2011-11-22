@@ -4,15 +4,20 @@
 	<table class="list">
 		<tbody>
 			<tr>
-				<th>#</th><th>Date</th><th>Subject</th><th>Convacator</th><th>Issue</th>
+				<th>#</th><th>Date</th><th>Subject</th><th>Convenor</th><th>Issue</th>
 			</tr>
-			<% @meetings.each do |meeting| %>
+			<% 
+                        currentIndex = 0
+                        @meetings.each do |meeting| 
+                        currentIndex = currentIndex + 1
+                        oddEven = currentIndex % 2 == 0 ? 'even' : 'odd'
+                        %>
 			<tr>
-				<td class="id"><%= link_to meeting.id, { :action => 'show', :meeting_id => meeting, :id => @project} %></td>
-				<td class="updated_on"><%= format_time(meeting.date) %></td>
-				<td class="subject"><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting, :id => @project} %></td>
-				<td class="assigned_to"><%= meeting.convacator.name %></td>
-				<td class="id"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
+				<td class="id <%= oddEven %>"><%= link_to meeting.id, { :action => 'show', :meeting_id => meeting, :id => @project} %></td>
+				<td class="updated_on <%= oddEven %>"><%= format_time(meeting.date) %></td>
+				<td class="subject <%= oddEven %>"><%= link_to meeting.subject, { :action => 'show', :meeting_id => meeting, :id => @project} %></td>
+				<td class="assigned_to <%= oddEven %>"><%= meeting.convacator.name %></td>
+				<td class="id <%= oddEven %>"><%= link_to meeting.issue.id, :controller => 'issues', :action => 'show', :id => meeting.issue %></td>
 			</tr>
 			<% end %>
 		</tbody>			
