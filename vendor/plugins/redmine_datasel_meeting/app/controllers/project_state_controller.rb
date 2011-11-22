@@ -8,6 +8,7 @@ class ProjectStateController < ApplicationController
         @project.datasel_meeting_priority_id = params[:priority_id]
 	@project.datasel_meeting_tracker_id = params[:tracker_id]
 	@project.datasel_meeting_activity_id = params[:activity_id]
+	@project.datasel_meeting_time_log_status_id = params[:time_log_status_id]
 	@project.save!
 	flash[:notice] = l(:notice_your_preferences_were_saved)
 	redirect_to :controller => "projects", :action => 'settings', :tab => 'datasel_meeting', :id => @project

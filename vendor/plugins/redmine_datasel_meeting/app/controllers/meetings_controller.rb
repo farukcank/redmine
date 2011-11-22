@@ -21,11 +21,22 @@ class MeetingsController < ApplicationController
   		issue.subject = @meeting.subject
   		issue.description = @meeting.agenda
   		issue.save!
+		oldConvacatorId = @meeting.convacator_id
   		if @meeting.update_attributes(params[:meeting])
   			redirect_to :action => 'show', :id => @project, :meeting_id => @meeting.id
   		else
   			render :action => 'edit'
   		end
+		for p in @meeting.internal_participants do
+			if p.user_id == @meeting.convacator_id
+				if oldConvacatorId
+					p.user_id = oldConvacatorId
+					p.save!
+				else
+					p.delete
+				end
+			end
+		end
 		issue = @meeting.issue
                 issue.save!
 		InternalParticipantsController.setTimeEntriesOfMeeting!(@meeting)

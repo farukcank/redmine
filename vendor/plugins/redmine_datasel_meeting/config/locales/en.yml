@@ -12,3 +12,4 @@ en:
   label_priority: "Priority"
   label_cross_project: "Cross Project"
   field_internal_participants: "Internal Participants"
+  label_time_log_status: "Status to crete time entries"

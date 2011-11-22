@@ -9,6 +9,8 @@
                 <td><%= select_tag("priority_id", options_from_collection_for_select(IssuePriority.all, :id, :name, :selected => @project.datasel_meeting_priority_id)) %></td></tr>
                 <tr><td><%= l(:label_activity) %>:</td>
                 <td><%= select_tag("activity_id", options_from_collection_for_select(@project.activities, :id, :name, :selected => @project.datasel_meeting_activity_id)) %></td></tr>
+		<tr><td><%= l(:label_time_log_status) %>:</td>
+                <td><%= select_tag("time_log_status_id", options_from_collection_for_select(IssueStatus.all, :id, :name, :selected => @project.datasel_meeting_time_log_status_id)) %></td></tr>
 		<tr><td><%= l(:label_cross_project) %>:</td>
                 <td><%= check_box_tag("cross_project","true", @project.datasel_meeting_cross_project) %></td></tr>
                 <tr><td colspan='2'><%= submit_tag(l(:submit_save), :title => l(:title_save_preferences)) %></td></tr>
