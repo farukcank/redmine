@@ -19,7 +19,7 @@ class PanelIssueHooks < Redmine::Hook::ViewListener
     if (issue_id)
       issue = Issue.find(issue_id, :include => [:status])
 	  if (issue)
-		if (User.current.allowed_to?(:edit_issues, project))
+#		if (User.current.allowed_to?(:edit_issues, project))
 		  o = ''
           statuses = issue.new_statuses_allowed_to(User.current)
           if (!statuses.empty?)
@@ -33,7 +33,7 @@ class PanelIssueHooks < Redmine::Hook::ViewListener
 				end
 			end
 			o << "</table>"
-          end
+#
 		  assignables = project.assignable_users
           if (!assignables.empty?)
 		    o << "<h3>#{l(:label_issue_change_assigned)}</h3>"
@@ -50,7 +50,9 @@ class PanelIssueHooks < Redmine::Hook::ViewListener
 			o << "</table></div>"
           end
 		  o << "<h3>Planning</h3>"
-		end
+#
+          end
+#		end
 	  end
 	  return o
     end
