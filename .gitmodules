@@ -1,0 +1,3 @@
+[submodule "vendor/plugins/redmine_git_hosting"]
+	path = vendor/plugins/redmine_git_hosting
+	url = https://github.com/ericpaulbishop/redmine_git_hosting.git
