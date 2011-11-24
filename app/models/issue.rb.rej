@@ -1,21 +1,21 @@
 ***************
-*** 335,340 ****
-          errors.add_to_base I18n.t(:error_can_not_reopen_issue_on_closed_version)
-        end
-      end
-      
-      # Checks that the issue can not be added/moved to a disabled tracker
-      if project && (tracker_id_changed? || project_id_changed?)
---- 339,350 ----
-          errors.add_to_base I18n.t(:error_can_not_reopen_issue_on_closed_version)
-        end
-      end
-+ 
-+     if category
-+       if !assignable_categories.include?(category)
-+         errors.add :category_id, :inclusion
-+       end
+*** 257,263 ****
+      notified = project.notified_users
+      # Author and assignee are always notified unless they have been locked
+      notified << author if author && author.active?
+-     notified << assigned_to if assigned_to && assigned_to.active?
+      notified.uniq!
+      # Remove users that can not view the issue
+      notified.reject! {|user| !visible?(user)}
+--- 257,267 ----
+      notified = project.notified_users
+      # Author and assignee are always notified unless they have been locked
+      notified << author if author && author.active?
++     if assigned_to.is_a? Group
++       notified += assigned_to.users
++     else
++       notified << assigned_to if assigned_to && assigned_to.active?
 +     end
-      
-      # Checks that the issue can not be added/moved to a disabled tracker
-      if project && (tracker_id_changed? || project_id_changed?)
+      notified.uniq!
+      # Remove users that can not view the issue
+      notified.reject! {|user| !visible?(user)}

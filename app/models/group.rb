@@ -28,6 +28,8 @@ class Group < Principal
   def to_s
     lastname.to_s
   end
+
+  alias :name :to_s
   
   def user_added(user)
     members.each do |member|

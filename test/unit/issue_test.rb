@@ -28,6 +28,8 @@ class IssueTest < ActiveSupport::TestCase
            :custom_fields, :custom_fields_projects, :custom_fields_trackers, :custom_values,
            :time_entries
 
+  should_belong_to :assigned_to
+  
   def test_create
     issue = Issue.new(:project_id => 1, :tracker_id => 1, :author_id => 3, :status_id => 1, :priority => IssuePriority.all.first, :subject => 'test_create', :description => 'IssueTest#test_create', :estimated_hours => '1:30')
     assert issue.save
@@ -578,6 +580,16 @@ class IssueTest < ActiveSupport::TestCase
     copy  = issue.move_to_project(Project.find(5), Tracker.find(2), :copy => true)
     # author is not a member of project anymore
     assert !copy.recipients.include?(copy.author.mail)
+  end
+
+  test '#recipients should include the assigned group members' do
+    group_member = User.generate_with_protected!
+    group = Group.generate!
+    group.users << group_member
+    
+    issue = Issue.find(12)
+    issue.assigned_to = group
+    assert issue.recipients.include?(group_member.mail)
   end
 
   def test_watcher_recipients_should_not_include_users_that_cannot_view_the_issue
