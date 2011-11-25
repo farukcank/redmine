@@ -550,20 +550,15 @@ module ApplicationHelper
           if page =~ /^(.+?)\#(.+)$/
             page, anchor = $1, $2
           end
-          anchor = sanitize_anchor_name(anchor) if anchor.present?
           # check if page exists
           wiki_page = link_project.wiki.find_page(page)
-          url = if anchor.present? && wiki_page.present? && (obj.is_a?(WikiContent) || obj.is_a?(WikiContent::Version)) && obj.page == wiki_page
-            "##{anchor}"
-          else
-            case options[:wiki_links]
-            when :local; "#{page.present? ? Wiki.titleize(page) : ''}.html" + (anchor.present? ? "##{anchor}" : '')
+          url = case options[:wiki_links]
+            when :local; "#{title}.html"
             when :anchor; "##{title}"   # used for single-file wiki export
             else
               wiki_page_id = page.present? ? Wiki.titleize(page) : nil
               url_for(:only_path => only_path, :controller => 'wiki', :action => 'show', :project_id => link_project, :id => wiki_page_id, :anchor => anchor)
             end
-          end
           link_to((title || page), url, :class => ('wiki-page' + (wiki_page ? '' : ' new')))
         else
           # project or wiki doesn't exist
@@ -708,7 +703,7 @@ module ApplicationHelper
     text.gsub!(HEADING_RE) do
       level, attrs, content = $1.to_i, $2, $3
       item = strip_tags(content).strip
-      anchor = sanitize_anchor_name(item)
+      anchor = item.gsub(%r{[^\w\s\-]}, '').gsub(%r{\s+(\-+\s*)?}, '-')
       @parsed_headings << [level, anchor, item]
       "<a name=\"#{anchor}\"></a>\n<h#{level} #{attrs}>#{content}<a href=\"##{anchor}\" class=\"wiki-anchor\">&para;</a></h#{level}>"
     end
@@ -843,6 +838,14 @@ module ApplicationHelper
     javascript_tag("Calendar.setup({inputField : '#{field_id}', ifFormat : '%Y-%m-%d', button : '#{field_id}_trigger' });")
   end
 
+  #pstart
+  def g_calendar_for(field_id)
+    include_calendar_headers_tags
+    image_tag("calendar.png", {:id => "#{field_id}_trigger",:class => "calendar-trigger"}) +
+    javascript_tag("Calendar.setup({inputField : '#{field_id}', electric : false, ifFormat : '%Y-%m-%d', button : '#{field_id}_trigger' });")
+  end
+  #pend
+
   def include_calendar_headers_tags
     unless @calendar_headers_tags_included
       @calendar_headers_tags_included = true
@@ -892,10 +895,6 @@ module ApplicationHelper
     else
       ''
     end
-  end
-
-  def sanitize_anchor_name(anchor)
-    anchor.gsub(%r{[^\w\s\-]}, '').gsub(%r{\s+(\-+\s*)?}, '-')
   end
 
   # Returns the javascript tags that are included in the html layout head

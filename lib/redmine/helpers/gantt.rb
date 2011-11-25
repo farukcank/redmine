@@ -70,6 +70,9 @@ module Redmine
 
         @subjects = ''
         @lines = ''
+        #pstart
+        @calendars = ''
+        #pend
         @number_of_rows = nil
 
         @issue_ancestors = []
@@ -129,6 +132,14 @@ module Redmine
         @lines
       end
 
+      #pstart
+      # Renders the calendars of the Gantt chart, the right side
+      def calendars(options={})
+        render(options.merge(:only => :calendars)) unless @calendars_rendered
+        @calendars
+      end
+      #pend
+
       # Returns issues that will be rendered
       def issues
         @issues ||= @query.issues(
@@ -175,8 +186,17 @@ module Redmine
         options = {:top => 0, :top_increment => 20, :indent_increment => 20, :render => :subject, :format => :html}.merge(options)
         indent = options[:indent] || 4
 
-        @subjects = '' unless options[:only] == :lines
-        @lines = '' unless options[:only] == :subjects
+         #pstart
+        if options[:format] == :html
+          @subjects = '' unless options[:only] == :lines && options[:only] == :calendars
+          @lines = '' unless options[:only] == :subjects && options[:only] == :calendars
+          @calendars = '' unless options[:only] == :lines && options[:only] == :subjects
+        else
+          @subjects = '' unless options[:only] == :lines
+          @lines = '' unless options[:only] == :subjects
+        end
+        #pend
+
         @number_of_rows = 0
 
         Project.project_tree(projects) do |project, level|
@@ -185,15 +205,32 @@ module Redmine
           break if abort?
         end
 
-        @subjects_rendered = true unless options[:only] == :lines
-        @lines_rendered = true unless options[:only] == :subjects
+        #pstart
+        if options[:format] == :html
+          @subjects_rendered = true unless options[:only] == :lines && options[:only] == :calendars
+          @lines_rendered = true unless options[:only] == :subjects && options[:only] == :calendars
+          @calendars_rendered = true unless options[:only] == :lines && options[:only] == :subjects
+        else
+          @subjects_rendered = true unless options[:only] == :lines
+          @lines_rendered = true unless options[:only] == :subjects
+        end
+        #pend
 
         render_end(options)
       end
 
       def render_project(project, options={})
-        subject_for_project(project, options) unless options[:only] == :lines
-        line_for_project(project, options) unless options[:only] == :subjects
+
+        #pstart
+        if options[:format] == :html
+          subject_for_project(project, options) unless options[:only] == :lines && options[:only] == :calendars
+          line_for_project(project, options) unless options[:only] == :subjects && options[:only] == :calendars
+          calendar_for_project(project, options) unless options[:only] == :lines && options[:only] == :subjects
+        else
+          subject_for_project(project, options) unless options[:only] == :lines
+          line_for_project(project, options) unless options[:only] == :subjects
+        end
+        #pend
 
         options[:top] += options[:top_increment]
         options[:indent] += options[:indent_increment]
@@ -220,8 +257,17 @@ module Redmine
         @issue_ancestors = []
 
         issues.each do |i|
-          subject_for_issue(i, options) unless options[:only] == :lines
-          line_for_issue(i, options) unless options[:only] == :subjects
+
+          #pstart
+          if options[:format] == :html
+            subject_for_issue(i, options) unless options[:only] == :lines && options[:only] == :calendars
+            line_for_issue(i, options) unless options[:only] == :subjects && options[:only] == :calendars
+            calendar_for_issue(i, options) unless options[:only] == :lines && options[:only] == :subjects
+          else
+            subject_for_issue(i, options) unless options[:only] == :lines
+            line_for_issue(i, options) unless options[:only] == :subjects
+          end
+          #pend
 
           options[:top] += options[:top_increment]
           @number_of_rows += 1
@@ -233,8 +279,17 @@ module Redmine
 
       def render_version(project, version, options={})
         # Version header
-        subject_for_version(version, options) unless options[:only] == :lines
-        line_for_version(version, options) unless options[:only] == :subjects
+
+          #pstart
+          if options[:format] == :html
+            subject_for_version(version, options) unless options[:only] == :lines && options[:only] == :calendars
+            line_for_version(version, options) unless options[:only] == :subjects && options[:only] == :calendars
+            calendar_for_version(version, options) unless options[:only] == :lines && options[:only] == :subjects
+          else
+            subject_for_version(version, options) unless options[:only] == :lines
+            line_for_version(version, options) unless options[:only] == :subjects
+          end
+          #pend
 
         options[:top] += options[:top_increment]
         @number_of_rows += 1
@@ -283,7 +338,11 @@ module Redmine
 
           case options[:format]
           when :html
-            html_task(options, coords, :css => "project task", :label => label, :markers => true)
+
+            #pstart
+            html_task(options, coords, :css => "project task", :label => label, :markers => true, :id => project.id, :kind => "p")
+            #pend
+
           when :image
             image_task(options, coords, :label => label, :markers => true, :height => 3)
           when :pdf
@@ -322,7 +381,11 @@ module Redmine
 
           case options[:format]
           when :html
-            html_task(options, coords, :css => "version task", :label => label, :markers => true)
+
+            #pstart
+            html_task(options, coords, :css => "version task", :label => label, :markers => true, :id => version.id, :kind => "v")
+            #pend
+
           when :image
             image_task(options, coords, :label => label, :markers => true, :height => 3)
           when :pdf
@@ -376,9 +439,23 @@ module Redmine
           coords = coordinates(issue.start_date, issue.due_before, issue.done_ratio, options[:zoom])
           label = "#{ issue.status.name } #{ issue.done_ratio }%"
 
+          #pstart
+          if !issue.due_date && issue.fixed_version
+            if options[:format] == :html
+              label += "-&nbsp;<strong>#{h(issue.fixed_version.name)}</strong>"
+            else
+              label += "-#{h(issue.fixed_version.name)}"
+            end
+          end
+          #pend
+
           case options[:format]
           when :html
-            html_task(options, coords, :css => "task " + (issue.leaf? ? 'leaf' : 'parent'), :label => label, :issue => issue, :markers => !issue.leaf?)
+
+            #pstart
+            html_task(options, coords, :css => "task " + (issue.leaf? ? 'leaf' : 'parent'), :label => label, :issue => issue, :markers => !issue.leaf?, :id => issue.id, :kind => "i")
+            #pend
+
           when :image
             image_task(options, coords, :label => label)
           when :pdf
@@ -498,8 +575,10 @@ module Redmine
         if Date.today >= @date_from and Date.today <= date_to
           gc.stroke('red')
           x = (Date.today-@date_from+1)*zoom + subject_width
-          gc.line(x, headers_height, x, headers_height + g_height-1)
+          #pstart
+          gc.line(x, headers_heigth, x, headers_heigth + g_height-1)
         end
+          #pend
 
         gc.draw(imgl)
         imgl.format = format
@@ -617,6 +696,107 @@ module Redmine
         render(options)
         pdf.Output
       end
+
+      #pstart
+      def edit(pms)
+        id = pms[:id]
+        kind = id.slice!(0).chr
+        begin
+          case kind
+          when 'i'
+            @issue = Issue.find(pms[:id], :include => [:project, :tracker, :status, :author, :priority, :category])
+          when 'p'
+            @issue = Project.find(pms[:id])
+          when 'v'
+            @issue = Version.find(pms[:id], :include => [:project])
+          end
+        rescue ActiveRecord::RecordNotFound
+          return "issue not found : #{pms[:id]}", 400
+        end
+
+        if !@issue.start_date || !@issue.due_before
+          #render :text=>l(:notice_locking_conflict), :status=>400
+          return l(:notice_locking_conflict), 400
+        end
+        @issue.init_journal(User.current)
+        date_from = Date.parse(pms[:date_from])
+        old_start_date = @issue.start_date
+        o = get_issue_position(@issue, pms[:zoom])
+        text_for_revert = "#{kind}#{id}=#{format_date(@issue.start_date)},#{@issue.start_date},#{format_date(@issue.due_before)},#{@issue.due_before},#{o[0]},#{o[1]},#{o[2]},#{o[3]}"
+
+        if pms[:day]
+          #bar moved
+          day = pms[:day].to_i
+          duration = @issue.due_before - @issue.start_date
+          @issue.start_date = date_from + day
+          @issue.due_date = @issue.start_date + duration.to_i if @issue.due_date
+        elsif pms[:start_date]
+          #start date changed
+          start_date = Date.parse(pms[:start_date])
+          if @issue.start_date == start_date
+            #render :text=>""
+            return "", 200 #nothing has changed
+          end
+          @issue.start_date = start_date
+          @issue.due_date = start_date if @issue.due_date && start_date > @issue.due_date
+        elsif pms[:due_date]
+          #due date changed
+          due_date = Date.parse(pms[:due_date])
+          if @issue.due_date == due_date
+            #render :text=>""
+            return "", 200 #nothing has changed
+          end
+          @issue.due_date = due_date
+          @issue.start_date = due_date if due_date < @issue.start_date
+        end
+        fv = @issue.fixed_version
+        if fv && fv.effective_date && !@issue.due_date && fv.effective_date < @issue.start_date
+          @issue.start_date = old_start_date
+        end
+
+        begin
+          @issue.save!
+          o = get_issue_position(@issue, pms[:zoom])
+          text = "#{kind}#{id}=#{format_date(@issue.start_date)},#{@issue.start_date},#{format_date(@issue.due_before)},#{@issue.due_before},#{o[0]},#{o[1]},#{o[2]},#{o[3]}"
+
+          prj_map = {}
+          text = set_project_data(@issue.project, pms[:zoom], text, prj_map)
+          version_map = {}
+          text = set_version_data(@issue.fixed_version, pms[:zoom], text, version_map)
+
+          #check dependencies
+          issues = @issue.all_precedes_issues
+          issues.each do |i|
+            o = get_issue_position(i, pms[:zoom])
+            text += "|i#{i.id}=#{format_date(i.start_date)},#{i.start_date},#{format_date(i.due_before)},#{i.due_before},#{o[0]},#{o[1]},#{o[2]},#{o[3]}"
+            text = set_project_data(i.project, pms[:zoom], text, prj_map)
+            text = set_version_data(i.fixed_version, pms[:zoom], text, version_map)
+          end
+
+          #check parent
+          is = @issue
+          while
+            pid = is.parent_issue_id
+            break if !pid
+            i = Issue.find(pid)
+            o = get_issue_position(i, pms[:zoom])
+            text += "|i#{i.id}=#{format_date(i.start_date)},#{i.start_date},#{format_date(i.due_before)},#{i.due_before},#{o[0]},#{o[1]},#{o[2]},#{o[3]},#{o[4]},#{o[5]}"
+            text = set_project_data(i.project, pms[:zoom], text, prj_map)
+            text = set_version_data(i.fixed_version, pms[:zoom], text, version_map)
+            is = i
+          end
+          #render :text=>text
+          return text, 200
+        rescue => e
+          #render :text=>@issue.errors.full_messages.join("\n") + "|" + text_for_revert  , :status=>400
+          if @issue.errors.full_messages.to_s == ""
+            return e.to_s + "\n" + [$!,$@.join("\n")].join("\n") + "\n" + @issue.errors.full_messages.join("\n") + "|" + text_for_revert, 400
+          else
+            return @issue.errors.full_messages.join("\n") + "|" + text_for_revert, 400
+          end
+        end
+      end
+      #pend
 
       private
 
@@ -737,33 +917,67 @@ module Redmine
         output = ''
         # Renders the task bar, with progress and late
         if coords[:bar_start] && coords[:bar_end]
-          output << "<div style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
-
+          #pstart
+          i_width = coords[:bar_end] - coords[:bar_start] - 2
+          output << "<div id='ev_#{options[:kind]}#{options[:id]}' style='position:absolute;left:#{coords[:bar_start]}px;top:#{params[:top]}px;padding-top:3px;height:18px;width:#{ i_width + 100}px;' #{options[:kind] == 'i' ? "class='handle'" : ""}>"
+          output << "<div id='task_todo_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:#{ i_width}px;' class='#{options[:css]} task_todo'>&nbsp;</div>"
+          #pend
           if coords[:bar_late_end]
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_late_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_late'>&nbsp;</div>"
+            #pstart
+            l_width = coords[:bar_late_end] - coords[:bar_start] - 2
+            output << "<div id='task_late_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:#{ l_width}px;' class='#{ l_width == 0 ? options[:css] + " task_none" : options[:css] + " task_late"}'>&nbsp;</div>"
+          else
+            output << "<div id='task_late_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:0px;' class='#{ options[:css] + " task_none"}'>&nbsp;</div>"
+            #pend
           end
           if coords[:bar_progress_end]
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_progress_end] - coords[:bar_start] - 2}px;' class='#{options[:css]} task_done'>&nbsp;</div>"
+            #pstart
+            d_width = coords[:bar_progress_end] - coords[:bar_start] - 2
+            output << "<div id='task_done_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:#{ d_width}px;' class='#{ d_width == 0 ? options[:css] + " task_none" : options[:css] + " task_done"}'>&nbsp;</div>"
+          else
+            output << "<div id='task_done_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:0px;' class='#{ options[:css] + " task_none"}'>&nbsp;</div>"
+            #pend
           end
+          #pstart
+          output << "</div>"
+        else
+          output << "<div id='ev_#{options[:kind]}#{options[:id]}' style='position:absolute;left:0px;top:#{params[:top]}px;padding-top:3px;height:18px;width:0px;' #{options[:kind] == 'i' ? "class='handle'" : ""}>"
+          output << "<div id='task_todo_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:0px;' class='#{ options[:css]} task_todo'>&nbsp;</div>"
+          output << "<div id='task_late_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:0px;' class='#{ options[:css] + " task_none"}'>&nbsp;</div>"
+          output << "<div id='task_done_#{options[:kind]}#{options[:id]}' style='float:left:0px; width:0px;' class='#{ options[:css] + " task_none"}'>&nbsp;</div>"
+          output << "</div>"
+        #pend
         end
         # Renders the markers
         if options[:markers]
           if coords[:start]
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:start] }px;width:15px;' class='#{options[:css]} marker starting'>&nbsp;</div>"
+            #pstart
+            output << "<div id='marker_start_#{options[:kind]}#{options[:id]}' style='top:#{ params[:top] }px;left:#{ coords[:start] }px;width:15px;' class='#{options[:css]} marker starting'>&nbsp;</div>"
+            #pend
           end
           if coords[:end]
-            output << "<div style='top:#{ params[:top] }px;left:#{ coords[:end] + params[:zoom] }px;width:15px;' class='#{options[:css]} marker ending'>&nbsp;</div>"
+            #pstart
+            output << "<div id='marker_end_#{options[:kind]}#{options[:id]}' style='top:#{ params[:top] }px;left:#{ coords[:end] + params[:zoom] }px;width:15px;' class='#{options[:css]} marker ending'>&nbsp;</div>"
+            #pend
           end
+        #pstart
+        else
+          output << view.draggable_element("ev_#{options[:kind]}#{options[:id]}", :revert =>false, :scroll=>"'gantt-container'", :constraint => "'horizontal'", :snap=>params[:zoom],:onEnd=>'function( draggable, event )  {issue_moved(draggable.element);}')         #pend
         end
+
         # Renders the label on the right
         if options[:label]
-          output << "<div style='top:#{ params[:top] }px;left:#{ (coords[:bar_end] || 0) + 8 }px;' class='#{options[:css]} label'>"
+          #psrat
+          output << "<div id='label_#{options[:kind]}#{options[:id]}' style='top:#{ params[:top] }px;left:#{ (coords[:bar_end] || 0) + 8 }px;' class='#{options[:css]} label'>"
+          #pend
           output << options[:label]
           output << "</div>"
         end
         # Renders the tooltip
         if options[:issue] && coords[:bar_start] && coords[:bar_end]
-          output << "<div class='tooltip' style='position: absolute;top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] }px;height:12px;'>"
+          #pstart
+          output << "<div id='tt_#{options[:kind]}#{options[:id]}' class='tooltip' style='position: absolute;top:#{ params[:top] }px;left:#{ coords[:bar_start] }px;width:#{ coords[:bar_end] - coords[:bar_start] }px;height:12px;'>"
+          #pend
           output << '<span class="tip">'
           output << view.render_issue_tooltip(options[:issue])
           output << "</span></div>"
@@ -855,6 +1069,212 @@ module Redmine
           params[:image].text(params[:subject_width] + (coords[:bar_end] || 0) + 5,params[:top] + 1, options[:label])
         end
       end
+
+      #pstart
+      ##
+      ##  for edit gantt
+      ##
+      def set_project_data(prj, zoom, text, prj_map = {})
+        if !prj
+          return text
+        end
+        if !prj_map[prj.id]
+          o = get_project_position(prj, zoom)
+          text += "|p#{prj.id}=#{format_date(prj.start_date)},#{prj.start_date},#{format_date(prj.due_date)},#{prj.due_date},#{o[0]},#{o[1]},#{o[2]},#{o[3]},#{o[4]},#{o[5]}"
+          prj_map[prj.id] = prj
+        end
+        text = set_project_data(prj.parent, zoom, text, prj_map)
+      end
+
+      def set_version_data(version, zoom, text, version_map = {})
+        if !version
+          return text
+        end
+        if !version_map[version.id]
+          o = get_version_position(version, zoom)
+          text += "|v#{version.id}=#{format_date(version.start_date)},#{version.start_date},#{format_date(version.due_date)},#{version.due_date},#{o[0]},#{o[1]},#{o[2]},#{o[3]},#{o[4]},#{o[5]}"
+          version_map[version.id] = version
+        end
+        return text
+      end
+
+      def get_pos(coords)
+        i_left = 0
+        i_width = 0
+        l_width = 0
+        d_width = 0
+        if coords[:bar_start]
+          i_left = coords[:bar_start]
+          if coords[:bar_end]
+            i_width = coords[:bar_end] - coords[:bar_start] - 2
+            i_width = 0 if i_width < 0
+          end
+          if coords[:bar_late_end]
+            l_width = coords[:bar_late_end] - coords[:bar_start] - 2
+          end
+          if coords[:bar_progress_end]
+            d_width = coords[:bar_progress_end] - coords[:bar_start] - 2
+          end
+        end
+        return i_left, i_width, l_width, d_width
+      end
+
+      def get_issue_position(issue, zoom_str)
+        z = zoom_str.to_i
+        zoom = 1
+        z.times { zoom = zoom * 2}
+        id = issue.due_before
+        if id && @date_to < id
+          id = @date_to
+        end
+        coords = coordinates(issue.start_date, id, issue.done_ratio, zoom)
+
+        i_left, i_width, l_width, d_width = get_pos(coords)
+        if coords[:end]
+          return i_left, i_width, l_width, d_width, coords[:start], coords[:end] + zoom
+        else
+          return i_left, i_width, l_width, d_width, coords[:start], nil
+        end
+      end
+
+      def get_project_position(project, zoom_str)
+        z = zoom_str.to_i
+        zoom = 1
+        z.times { zoom = zoom * 2}
+        pd = project.due_date
+        if pd && @date_to < pd
+          pd = @date_to
+        end
+        coords = coordinates(project.start_date, pd, nil, zoom)
+        i_left, i_width, l_width, d_width = get_pos(coords)
+        if coords[:end]
+          return i_left, i_width, l_width, d_width, coords[:start], coords[:end] + zoom
+        else
+          return i_left, i_width, l_width, d_width, coords[:start], nil
+        end
+      end
+
+      def get_version_position(version, zoom_str)
+        z = zoom_str.to_i
+        zoom = 1
+        z.times { zoom = zoom * 2}
+        vd = version.due_date
+        if vd &&  @date_to < vd
+          vd = @date_to
+        end
+        coords = coordinates(version.start_date, vd, version.completed_pourcent, zoom)
+        i_left, i_width, l_width, d_width = get_pos(coords)
+        if coords[:end]
+          return i_left, i_width, l_width, d_width, coords[:start], coords[:end] + zoom
+        else
+          return i_left, i_width, l_width, d_width, coords[:start], nil
+        end
+      end
+
+      def calendar_for_issue(issue, options)
+        # Skip issues that don't have a due_before (due_date or version's due_date)
+        if issue.is_a?(Issue) && issue.due_before
+
+          case options[:format]
+          when :html
+            @calendars << "<div style='position: absolute;line-height:1.2em;height:16px;top:#{options[:top]}px;left:4px;overflow:hidden;'>"
+            start_date = issue.start_date
+            if start_date
+              @calendars << "<span id='i#{issue.id}_start_date_str'>"
+              @calendars << format_date(start_date)
+              @calendars << "</span>"
+              @calendars << "<input type='hidden' size='12' id='i#{issue.id}_hidden_start_date' value='#{start_date}' />"
+              if issue.leaf?
+                @calendars << "<input type='hidden' size='12' id='i#{issue.id}_start_date' value='#{start_date}' />#{view.g_calendar_for('i' + issue.id.to_s + '_start_date')}"
+              else
+                @calendars << "<input type='hidden' size='12' id='i#{issue.id}_start_date' value='#{start_date}' />&nbsp;&nbsp;&nbsp;"
+              end
+              @calendars << observe_date_field("i#{issue.id}", 'start')
+            end
+            due_date = issue.due_date
+            if due_date
+              @calendars << "<span id='i#{issue.id}_due_date_str'>"
+              @calendars << format_date(due_date)
+              @calendars << "</span>"
+              @calendars << "<input type='hidden' size='12' id='i#{issue.id}_hidden_due_date' value='#{due_date}' />"
+              if issue.leaf?
+                @calendars << "<input type='hidden' size='12' id='i#{issue.id}_due_date' value='#{due_date}' />#{view.g_calendar_for('i' + issue.id.to_s + '_due_date')}"
+              else
+                @calendars << "<input type='hidden' size='12' id='i#{issue.id}_due_date' value='#{due_date}' />"
+              end
+              @calendars << observe_date_field("i#{issue.id}", 'due')
+            end
+            @calendars << "</div>"
+          when :image
+            #nop
+          when :pdf
+            #nop
+          end
+        else
+          ActiveRecord::Base.logger.debug "GanttHelper#line_for_issue was not given an issue with a due_before"
+          ''
+        end
+      end
+
+      def calendar_for_version(version, options)
+        # Skip version that don't have a due_before (due_date or version's due_date)
+        if version.is_a?(Version) && version.start_date && version.due_date
+
+          case options[:format]
+          when :html
+            @calendars << "<div style='position: absolute;line-height:1.2em;height:16px;top:#{options[:top]}px;left:4px;overflow:hidden;'>"
+            @calendars << "<span id='v#{version.id}_start_date_str'>"
+            @calendars << format_date(version.effective_date)
+            @calendars << "</span>"
+            @calendars << "</div>"
+          when :image
+            #nop
+          when :pdf
+            #nop
+          end
+        else
+          ActiveRecord::Base.logger.debug "GanttHelper#line_for_issue was not given an issue with a due_before"
+          ''
+        end
+      end
+
+      def calendar_for_project(project, options)
+        case options[:format]
+        when :html
+          @calendars << "<div style='position: absolute;line-height:1.2em;height:16px;top:#{options[:top]}px;left:4px;overflow:hidden;'>"
+          @calendars << "<span id='p#{project.id}_start_date_str'>"
+          @calendars << format_date(project.start_date) if project.start_date
+          @calendars << "</span>"
+          @calendars << "&nbsp;&nbsp;&nbsp;"
+          @calendars << "<span id='p#{project.id}_due_date_str'>"
+          @calendars << format_date(project.due_date) if project.due_date
+          @calendars << "</span>"
+          @calendars << "</div>"
+        when :image
+          # nop
+        when :pdf
+          # nop
+        end
+      end
+
+      def observe_date_field(id, type)
+        output = ''
+        prj_id = ''
+        prj_id = @project.to_param if @project
+        output << "<script type='text/javascript'>\n"
+        output << "//<![CDATA[\n"
+        output << "new Form.Element.Observer('#{id}_#{type}_date', 0.25,\n"
+        output << "  function(element, value) {\n"
+        output << "    if (value == document.getElementById('#{id}_hidden_#{type}_date').value) {\n"
+        output << "      return ;\n"
+        output << "    }\n"
+        output << "    new Ajax.Request('#{view.url_for(:controller=>:gantts, :action => :edit_gantt, :id=>id, :date_from=>self.date_from.strftime("%Y-%m-%d"), :date_to=>self.date_to.strftime("%Y-%m-%d"), :zoom=>self.zoom, :escape => false, :project_id=>prj_id)}', {asynchronous:true, evalScripts:true, onFailure:function(request){handle_failure(request.responseText)}, onSuccess:function(request){change_dates(request.responseText)}, parameters:'#{type}_date=' + encodeURIComponent(value)});"
+        output << "  })\n"
+        output << "//]]>\n"
+        output << "</script>"
+      end
+    #pend
+
     end
   end
 end

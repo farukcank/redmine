@@ -88,12 +88,19 @@ ActionController::Routing::Routes.draw do |map|
   map.quoted_issue '/issues/:id/quoted', :controller => 'journals', :action => 'new', :id => /\d+/, :conditions => { :method => :post }
   map.connect '/issues/:id/destroy', :controller => 'issues', :action => 'destroy', :conditions => { :method => :post } # legacy
 
-  map.with_options :controller => 'gantts', :action => 'show' do |gantts_routes|
-    gantts_routes.connect '/projects/:project_id/issues/gantt'
-    gantts_routes.connect '/projects/:project_id/issues/gantt.:format'
-    gantts_routes.connect '/issues/gantt.:format'
-  end
-  
+  #pstart
+  #map.with_options :controller => 'gantts', :action => 'show' do |gantts_routes|
+  #  gantts_routes.connect '/projects/:project_id/issues/gantt'
+  #  gantts_routes.connect '/projects/:project_id/issues/gantt.:format'
+  #  gantts_routes.connect '/issues/gantt.:format'
+  #end
+  #pend
+
+  #pstart
+  map.resource :gantt, :path_prefix => '/issues',                        :controller => 'gantts', :only => [:show, :update, :edit_gantt]
+  map.resource :gantt, :path_prefix => '/projects/:project_id/issues',   :controller => 'gantts', :only => [:show, :update, :edit_gantt]
+  #pend
+
   map.with_options :controller => 'calendars', :action => 'show' do |calendars_routes|
     calendars_routes.connect '/projects/:project_id/issues/calendar'
     calendars_routes.connect '/issues/calendar'

@@ -165,10 +165,6 @@ class Issue < ActiveRecord::Base
       unless new_project.shared_versions.include?(issue.fixed_version)
         issue.fixed_version = nil
       end
-      # Keep the category if it's still valid in the new_project
-      unless new_project.shared_categories.include?(issue.category)
-        issue.category = nil
-      end
       issue.project = new_project
       if issue.parent && issue.parent.project_id != issue.project_id
         issue.parent_issue_id = nil
@@ -230,11 +226,6 @@ class Issue < ActiveRecord::Base
     result = write_attribute(:tracker_id, tid)
     @custom_field_values = nil
     result
-  end
-
-  # Categories that the issue can be assigned to
-  def assignable_categories
-    @assignable_categories ||= (project.shared_categories + [IssueCategory.find_by_id(category_id_was)]).compact.uniq.sort
   end
   
   def description=(arg)
@@ -364,11 +355,7 @@ class Issue < ActiveRecord::Base
         errors.add_to_base I18n.t(:error_can_not_reopen_issue_on_closed_version)
       end
     end
-    if category
-		if !assignable_categories.include?(category)
-			errors.add :category_id, :inclusion
-       end
-	end
+
     # Checks that the issue can not be added/moved to a disabled tracker
     if project && (tracker_id_changed? || project_id_changed?)
       unless project.trackers.include?(tracker)
@@ -401,8 +388,8 @@ class Issue < ActiveRecord::Base
     end
   end
 
-  def init_journal(user, notes = "", private = false)
-    @current_journal ||= Journal.new(:journalized => self, :user => user, :notes => notes, :private => private)
+  def init_journal(user, notes = "")
+    @current_journal ||= Journal.new(:journalized => self, :user => user, :notes => notes)
     @issue_before_change = self.clone
     @issue_before_change.status = self.status
     @custom_values_before_change = {}
@@ -470,11 +457,6 @@ class Issue < ActiveRecord::Base
     @assignable_versions ||= (project.shared_versions.open + [Version.find_by_id(fixed_version_id_was)]).compact.uniq.sort
   end
 
-  # Categories that the issue can be assigned to
-  def assignable_categories
-   @assignable_categories ||= (project.shared_categories + [IssueCategory.find_by_id(category_id_was)]).compact.uniq.sort
-   end
-   
   # Returns true if this issue is blocked by another issue that is still open
   def blocked?
     !relations_to.detect {|ir| ir.relation_type == 'blocks' && !ir.issue_from.closed?}.nil?
@@ -531,6 +513,18 @@ class Issue < ActiveRecord::Base
     end
     dependencies
   end
+
+  #pstart
+  def all_precedes_issues
+    dependencies = []
+    relations_from.each do |relation|
+      next unless relation.relation_type == IssueRelation::TYPE_PRECEDES
+      dependencies << relation.issue_to
+      dependencies += relation.issue_to.all_dependent_issues
+    end
+    dependencies
+  end
+  #pend
 
   # Returns an array of issues that duplicate this one
   def duplicates
@@ -642,12 +636,6 @@ class Issue < ActiveRecord::Base
     update_versions(["#{Issue.table_name}.fixed_version_id = ?", version.id])
   end
 
-    # Unassigns issues from +category+ if it's no longer shared with issue's project
-	def self.update_categories_from_sharing_change(category)
-	# Update issues assigned to the category
-	update_categories(["#{Issue.table_name}.category_id = ?", category.id])
-	end
-	
   # Unassigns issues from versions that are no longer shared
   # after +project+ was moved
   def self.update_versions_from_hierarchy_change(project)
@@ -707,49 +695,6 @@ class Issue < ActiveRecord::Base
 
   def self.by_author(project)
     count_and_group_by(:project => project,
-                       :field => 'author_id',
-                       :joins => User.table_name)
-  end
-
-  # Unassigns issues from +category+ if it's no longer shared with issue's project
-  def self.update_categories_from_sharing_change(category)
-    # Update issues assigned to the category
-    update_categories(["#{Issue.table_name}.category_id = ?", category.id])
-  end
-  
-  # Added to be used in summary report with subprojects
-  def self.by_tracker_with_subprojects(project)
-    count_and_group_by_with_subprojects(:project => project,
-                       :field => 'tracker_id',
-                       :joins => Tracker.table_name)
-  end
-  
-  def self.by_version_with_subprojects(project)
-    count_and_group_by_with_subprojects(:project => project,
-                       :field => 'fixed_version_id',
-                       :joins => Version.table_name)
-  end
-
-  def self.by_priority_with_subprojects(project)
-    count_and_group_by_with_subprojects(:project => project,
-                       :field => 'priority_id',
-                       :joins => IssuePriority.table_name)
-  end
-
-  def self.by_category_with_subprojects(project)
-    count_and_group_by_with_subprojects(:project => project,
-                       :field => 'category_id',
-                       :joins => IssueCategory.table_name)
-  end
-
-  def self.by_assigned_to_with_subprojects(project)
-    count_and_group_by_with_subprojects(:project => project,
-                       :field => 'assigned_to_id',
-                       :joins => User.table_name)
-  end
-
-  def self.by_author_with_subprojects(project)
-    count_and_group_by_with_subprojects(:project => project,
                        :field => 'author_id',
                        :joins => User.table_name)
   end
@@ -896,27 +841,6 @@ class Issue < ActiveRecord::Base
     end
   end
 
-  # Update issues so their categories are not pointing to a
-  # fixed_version that is not shared with the issue's project
-  def self.update_categories(conditions=nil)
-    # Only need to update issues with a fixed_version from
-    # a different project and that is not systemwide shared
-    Issue.all(:conditions => merge_conditions("#{Issue.table_name}.category_id IS NOT NULL" +
-
-                                                " AND #{Issue.table_name}.project_id <> #{IssueCategory.table_name}.project_id" +
-                                                " AND #{IssueCategory.table_name}.sharing <> 'system'",
-                                                conditions),
-              :include => [:project, :category]
-              ).each do |issue|
-      next if issue.project.nil? || issue.category.nil?
-      unless issue.project.shared_categories.include?(issue.category)
-        issue.init_journal(User.current)
-        issue.category = nil
-        issue.save
-      end
-    end
-  end
-  
   # Callback on attachment deletion
   def attachment_removed(obj)
     journal = init_journal(User.current)
@@ -1013,54 +937,6 @@ class Issue < ActiveRecord::Base
                                                 and #{where}
                                                 and #{Issue.table_name}.project_id=#{Project.table_name}.id
                                                 and #{visible_condition(User.current, :project => project)}
-                                              group by s.id, s.is_closed, j.id")
-  end
-
-  # Update issues so their categories are not pointing to a
-  # fixed_version that is not shared with the issue's project
-  def self.update_categories(conditions=nil)
-    # Only need to update issues with a fixed_version from
-    # a different project and that is not systemwide shared
-    Issue.all(:conditions => merge_conditions("#{Issue.table_name}.category_id IS NOT NULL" +
-                                                " AND #{Issue.table_name}.project_id <> #{IssueCategory.table_name}.project_id" +
-                                                " AND #{IssueCategory.table_name}.sharing <> 'system'",
-                                                conditions),
-              :include => [:project, :category]
-              ).each do |issue|
-      next if issue.project.nil? || issue.category.nil?
-      unless issue.project.shared_categories.include?(issue.category)
-        issue.init_journal(User.current)
-        issue.category = nil
-        issue.save
-      end
-    end
-  end
-  
-  # Query generator for selecting groups of issue counts for a project
-  # based on specific criteria
-  #
-  # Options
-  # * project - Project to search in.
-  # * field - String. Issue field to key off of in the grouping.
-  # * joins - String. The table name to join against.
-  def self.count_and_group_by_with_subprojects(options)
-    project = options.delete(:project)
-    select_field = options.delete(:field)
-    joins = options.delete(:joins)
-
-    where = "#{Issue.table_name}.#{select_field}=j.id"
-
-    ActiveRecord::Base.connection.select_all("select    s.id as status_id, 
-                                                s.is_closed as closed, 
-                                                j.id as #{select_field},
-                                                count(#{Issue.table_name}.id) as total 
-                                              from 
-                                                  #{Issue.table_name}, #{Project.table_name}, #{IssueStatus.table_name} s, #{joins} j
-                                              where 
-                                                #{Issue.table_name}.status_id=s.id 
-                                                and #{where}
-                                                and #{Issue.table_name}.project_id=#{Project.table_name}.id
-                                                and #{visible_condition(User.current, :project => project, :with_subprojects => true)}
                                               group by s.id, s.is_closed, j.id")
   end
 end
