@@ -1,0 +1,12 @@
+***************
+*** 0 ****
+--- 1,9 ----
++ class Group < Principal
++   generator_for :lastname, :method => :next_lastname
++ 
++   def self.next_lastname
++     @last_lastname ||= 'AGroup'
++     @last_lastname.succ!
++     @last_lastname
++   end
++ end

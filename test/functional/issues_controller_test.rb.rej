@@ -1,0 +1,85 @@
+***************
+*** 532,538 ****
+      assert_not_nil v
+      assert_equal 'Value for field 2', v.value
+    end
+-   
+    def test_post_new_and_continue
+      @request.session[:user_id] = 2
+      post :new, :project_id => 1, 
+--- 532,557 ----
+      assert_not_nil v
+      assert_equal 'Value for field 2', v.value
+    end
++ 
++   def test_post_new_with_group_assignment
++     @group = Group.find(11)
++     @project = Project.find(1)
++     @project.members << Member.new(:principal => @group, :roles => [Role.first])
++ 
++     @request.session[:user_id] = 2
++     assert_difference 'Issue.count' do
++       post :new, :project_id => @project.id, 
++                  :issue => {:tracker_id => 3,
++                             :subject => 'This is the test_new_with_group_assignment issue',
++                             :assigned_to_id => @group.id}
++       end
++     assert_redirected_to :controller => 'issues', :action => 'show', :id => Issue.last.id
++     
++     issue = Issue.find_by_subject('This is the test_new_with_group_assignment issue')
++     assert_not_nil issue
++     assert_equal @group.id, issue.assigned_to_id
++   end
++ 
+    def test_post_new_and_continue
+      @request.session[:user_id] = 2
+      post :new, :project_id => 1, 
+***************
+*** 933,953 ****
+    end
+  
+    def test_bulk_edit
+      @request.session[:user_id] = 2
+      # update issues priority
+      post :bulk_edit, :ids => [1, 2], :priority_id => 7,
+-                                      :assigned_to_id => '',
+                                       :custom_field_values => {'2' => ''},
+                                       :notes => 'Bulk editing'
+      assert_response 302
+      # check that the issues were updated
+      assert_equal [7, 7], Issue.find_all_by_id([1, 2]).collect {|i| i.priority.id}
+      
+      issue = Issue.find(1)
+      journal = issue.journals.find(:first, :order => 'created_on DESC')
+      assert_equal '125', issue.custom_value_for(2).value
+      assert_equal 'Bulk editing', journal.notes
+-     assert_equal 1, journal.details.size
+    end
+  
+    def test_bullk_edit_should_send_a_notification
+--- 952,976 ----
+    end
+  
+    def test_bulk_edit
++     @group = Group.find(11)
++     @project = Project.find(1)
++     @project.members << Member.new(:principal => @group, :roles => [Role.first])
+      @request.session[:user_id] = 2
+      # update issues priority
+      post :bulk_edit, :ids => [1, 2], :priority_id => 7,
++                                      :assigned_to_id => @group.id,
+                                       :custom_field_values => {'2' => ''},
+                                       :notes => 'Bulk editing'
+      assert_response 302
+      # check that the issues were updated
+      assert_equal [7, 7], Issue.find_all_by_id([1, 2]).collect {|i| i.priority.id}
++     assert_equal [@group.id, @group.id], Issue.find_all_by_id([1, 2]).collect {|i| i.assigned_to.id}
+      
+      issue = Issue.find(1)
+      journal = issue.journals.find(:first, :order => 'created_on DESC')
+      assert_equal '125', issue.custom_value_for(2).value
+      assert_equal 'Bulk editing', journal.notes
++     assert_equal 2, journal.details.size
+    end
+  
+    def test_bullk_edit_should_send_a_notification

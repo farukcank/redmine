@@ -1,0 +1,19 @@
+***************
+*** 80,87 ****
+    map.quoted_issue '/issues/:id/quoted', :controller => 'journals', :action => 'new', :id => /\d+/, :conditions => { :method => :post }
+    map.connect '/issues/:id/destroy', :controller => 'issues', :action => 'destroy', :conditions => { :method => :post } # legacy
+  
+-   map.resource :gantt, :path_prefix => '/issues', :controller => 'gantts', :only => [:show, :update]
+-   map.resource :gantt, :path_prefix => '/projects/:project_id/issues', :controller => 'gantts', :only => [:show, :update]
+    map.resource :calendar, :path_prefix => '/issues', :controller => 'calendars', :only => [:show, :update]
+    map.resource :calendar, :path_prefix => '/projects/:project_id/issues', :controller => 'calendars', :only => [:show, :update]
+  
+--- 80,87 ----
+    map.quoted_issue '/issues/:id/quoted', :controller => 'journals', :action => 'new', :id => /\d+/, :conditions => { :method => :post }
+    map.connect '/issues/:id/destroy', :controller => 'issues', :action => 'destroy', :conditions => { :method => :post } # legacy
+  
++   map.resource :gantt, :path_prefix => '/issues', :controller => 'gantts', :only => [:show, :update, :edit_gantt]
++   map.resource :gantt, :path_prefix => '/projects/:project_id/issues', :controller => 'gantts', :only => [:show, :update, :edit_gantt]
+    map.resource :calendar, :path_prefix => '/issues', :controller => 'calendars', :only => [:show, :update]
+    map.resource :calendar, :path_prefix => '/projects/:project_id/issues', :controller => 'calendars', :only => [:show, :update]
+  

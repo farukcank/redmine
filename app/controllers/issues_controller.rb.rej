@@ -1,0 +1,17 @@
+***************
+*** 237,243 ****
+        tracker = params[:tracker_id].blank? ? nil : @project.trackers.find_by_id(params[:tracker_id])
+        status = params[:status_id].blank? ? nil : IssueStatus.find_by_id(params[:status_id])
+        priority = params[:priority_id].blank? ? nil : IssuePriority.find_by_id(params[:priority_id])
+-       assigned_to = (params[:assigned_to_id].blank? || params[:assigned_to_id] == 'none') ? nil : User.find_by_id(params[:assigned_to_id])
+        category = (params[:category_id].blank? || params[:category_id] == 'none') ? nil : @project.issue_categories.find_by_id(params[:category_id])
+        fixed_version = (params[:fixed_version_id].blank? || params[:fixed_version_id] == 'none') ? nil : @project.versions.find_by_id(params[:fixed_version_id])
+        custom_field_values = params[:custom_field_values] ? params[:custom_field_values].reject {|k,v| v.blank?} : nil
+--- 237,243 ----
+        tracker = params[:tracker_id].blank? ? nil : @project.trackers.find_by_id(params[:tracker_id])
+        status = params[:status_id].blank? ? nil : IssueStatus.find_by_id(params[:status_id])
+        priority = params[:priority_id].blank? ? nil : IssuePriority.find_by_id(params[:priority_id])
++       assigned_to = (params[:assigned_to_id].blank? || params[:assigned_to_id] == 'none') ? nil : Principal.find_by_id(params[:assigned_to_id])
+        category = (params[:category_id].blank? || params[:category_id] == 'none') ? nil : @project.issue_categories.find_by_id(params[:category_id])
+        fixed_version = (params[:fixed_version_id].blank? || params[:fixed_version_id] == 'none') ? nil : @project.versions.find_by_id(params[:fixed_version_id])
+        custom_field_values = params[:custom_field_values] ? params[:custom_field_values].reject {|k,v| v.blank?} : nil
