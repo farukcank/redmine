@@ -843,6 +843,14 @@ module ApplicationHelper
     javascript_tag("Calendar.setup({inputField : '#{field_id}', ifFormat : '%Y-%m-%d', button : '#{field_id}_trigger' });")
   end
 
+  #pstart
+  def g_calendar_for(field_id)
+    include_calendar_headers_tags
+    image_tag("calendar.png", {:id => "#{field_id}_trigger",:class => "calendar-trigger"}) +
+    javascript_tag("Calendar.setup({inputField : '#{field_id}', electric : false, ifFormat : '%Y-%m-%d', button : '#{field_id}_trigger' });")
+  end
+  #pend
+
   def include_calendar_headers_tags
     unless @calendar_headers_tags_included
       @calendar_headers_tags_included = true
