@@ -830,6 +830,7 @@ background-image:url('../images/close_hl.png');
 .task_late { background:#f66 url(../images/task_late.png); border: 1px solid #f66; }
 .task_done { background:#00c600 url(../images/task_done.png); border: 1px solid #00c600; }  
 .task_todo { background:#aaa url(../images/task_todo.png); border: 1px solid #aaa; }
+.task_none { background:transparent; border-style: none; }
 
 .task_todo.parent { background: #888; border: 1px solid #888; height: 3px;}
 .task_late.parent, .task_done.parent { height: 3px;}

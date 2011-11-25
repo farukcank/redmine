@@ -5,7 +5,7 @@
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-#
+# 
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -38,10 +38,10 @@ module Redmine
       attr_accessor :query
       attr_accessor :project
       attr_accessor :view
-
+      
       def initialize(options={})
         options = options.dup
-
+        
         if options[:year] && options[:year].to_i >0
           @year_from = options[:year].to_i
           if options[:month] && options[:month].to_i >=1 && options[:month].to_i <= 12
@@ -85,15 +85,15 @@ module Redmine
       def common_params
         { :controller => 'gantts', :action => 'show', :project_id => @project }
       end
-
+      
       def params
         common_params.merge({  :zoom => zoom, :year => year_from, :month => month_from, :months => months })
       end
-
+      
       def params_previous
         common_params.merge({:year => (date_from << months).year, :month => (date_from << months).month, :zoom => zoom, :months => months })
       end
-
+      
       def params_next
         common_params.merge({:year => (date_from >> months).year, :month => (date_from >> months).month, :zoom => zoom, :months => months })
       end
@@ -249,10 +249,10 @@ module Redmine
           options[:indent] -= options[:indent_increment]
         end
       end
-
+      
       def render_end(options={})
         case options[:format]
-        when :pdf
+        when :pdf        
           options[:pdf].Line(15, options[:top], PDF::TotalWidth, options[:top])
         end
       end
@@ -339,14 +339,14 @@ module Redmine
           @issue_ancestors.pop
           options[:indent] -= options[:indent_increment]
         end
-
+          
         output = case options[:format]
         when :html
           css_classes = ''
           css_classes << ' issue-overdue' if issue.overdue?
           css_classes << ' issue-behind-schedule' if issue.behind_schedule?
           css_classes << ' icon icon-issue' unless Setting.gravatar_enabled? && issue.assigned_to
-
+          
           subject = "<span class='#{css_classes}'>"
           if issue.assigned_to.present?
             assigned_string = l(:field_assigned_to) + ": " + issue.assigned_to.name
@@ -366,7 +366,7 @@ module Redmine
           @issue_ancestors << issue
           options[:indent] += options[:indent_increment]
         end
-
+        
         output
       end
 
@@ -430,7 +430,7 @@ module Redmine
           left = left + width
           month_f = month_f >> 1
         end
-
+        
         # Weeks headers
         if show_weeks
         	left = subject_width
@@ -479,7 +479,7 @@ module Redmine
               wday = 1 if wday > 7
         	end
         end
-
+    
         # border
         gc.fill('transparent')
         gc.stroke('grey')
@@ -637,7 +637,7 @@ module Redmine
           else
             coords[:bar_end] = self.date_to - self.date_from + 1
           end
-
+        
           if progress
             progress_date = start_date + (end_date - start_date + 1) * (progress / 100.0)
             if progress_date > self.date_from && progress_date > start_date
@@ -647,7 +647,7 @@ module Redmine
                 coords[:bar_progress_end] = self.date_to - self.date_from + 1
               end
             end
-
+            
             if progress_date < Date.today
               late_date = [Date.today, end_date].min
               if late_date > self.date_from && late_date > start_date
@@ -660,7 +660,7 @@ module Redmine
             end
           end
         end
-
+        
         # Transforms dates into pixels witdh
         coords.keys.each do |key|
           coords[key] = (coords[key] * zoom).floor
@@ -672,7 +672,7 @@ module Redmine
       def sort_issues!(issues)
         issues.sort! { |a, b| gantt_issue_compare(a, b, issues) }
       end
-
+  
       # TODO: top level issues should be sorted by start date
       def gantt_issue_compare(x, y, issues)
         if x.root_id == y.root_id
@@ -681,7 +681,7 @@ module Redmine
           x.root_id <=> y.root_id
         end
       end
-
+      
       def current_limit
         if @max_rows
           @max_rows - @number_of_rows
@@ -689,13 +689,13 @@ module Redmine
           nil
         end
       end
-
+      
       def abort?
         if @max_rows && @number_of_rows >= @max_rows
           @truncated = true
         end
       end
-
+      
       def pdf_new_page?(options)
         if options[:top] > 180
           options[:pdf].Line(15, options[:top], PDF::TotalWidth, options[:top])
@@ -704,7 +704,7 @@ module Redmine
           options[:pdf].Line(15, options[:top] - 0.1, PDF::TotalWidth, options[:top] - 0.1)
         end
       end
-
+      
       def html_subject(params, subject, options={})
         style = "position: absolute;top:#{params[:top]}px;left:#{params[:indent]}px;"
         style << "width:#{params[:subject_width] - params[:indent]}px;" if params[:subject_width]
@@ -819,12 +819,12 @@ module Redmine
 
       def image_task(params, coords, options={})
         height = options[:height] || 6
-
+        
         # Renders the task bar, with progress and late
         if coords[:bar_start] && coords[:bar_end]
           params[:image].fill('#aaa')
           params[:image].rectangle(params[:subject_width] + coords[:bar_start], params[:top], params[:subject_width] + coords[:bar_end], params[:top] - height)
-
+ 
           if coords[:bar_late_end]
             params[:image].fill('#f66')
             params[:image].rectangle(params[:subject_width] + coords[:bar_start], params[:top], params[:subject_width] + coords[:bar_late_end], params[:top] - height)
