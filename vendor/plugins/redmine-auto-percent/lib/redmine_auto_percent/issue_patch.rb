@@ -16,7 +16,7 @@ module RedmineAutoPercent
 
   module InstanceMethods
     def update_percent
-      self.done_ratio = 100 if self.status_id == 3 || self.status_id == 5
+      self.done_ratio = 100 if self.status_id == 3 || self.status_id == 5 || self.status_id == 11 || self.status_id == 13
     end
   end
 end
