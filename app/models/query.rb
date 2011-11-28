@@ -229,7 +229,7 @@ class Query < ActiveRecord::Base
 
     if project
       # project specific filters
-      categories = @project.issue_categories.all
+      categories = @project.shared_categories.all
       unless categories.empty?
         @available_filters["category_id"] = { :type => :list_optional, :order => 6, :values => categories.collect{|s| [s.name, s.id.to_s] } }
       end
